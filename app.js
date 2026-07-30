@@ -75,7 +75,7 @@ const contenidos = {
   soras: {
     numero: "05",
     tipo: "Poblaciones trasladadas",
-    titulo: "Los soras y el mapa de Alexis",
+    titulo: "Mapa de los Soras",
     texto:
       "La cara posterior del muro de proyección presenta el mapa elaborado en el marco de la investigación junto al texto dedicado a los soras, grupo trasladado al valle dentro de las políticas estatales de reasentamiento que redefinieron la composición social de Cochabamba.",
     objetivo: { x: -3.6, y: 1.03, z: -2.43 },
@@ -99,7 +99,7 @@ const contenidos = {
   aribalos: {
     numero: "07",
     tipo: "Cerámica estatal",
-    titulo: "Vitrina central de aríbalos",
+    titulo: "Vitrina central",
     texto:
       "La vitrina central de cuatro paredes de vidrio resguarda un conjunto de aríbalos dispuestos sobre una repisa, forma cerámica asociada al almacenamiento y al traslado de chicha que condensa la relación entre producción agrícola, redistribución estatal y celebración ritual.",
     objetivo: { x: 0.42, y: 1.05, z: 0.55 },
@@ -112,7 +112,7 @@ const contenidos = {
   materialidad: {
     numero: "08",
     tipo: "Objetos y soportes",
-    titulo: "Materialidad real",
+    titulo: "Materialidad",
     texto:
       "Dos vitrinas altas iluminadas desde la cubierta ordenan las piezas en tres niveles y acompañan a la lámina sobre materialidad, que discute cómo el registro arqueológico se convierte en objeto museográfico mediante procesos de selección, montaje e interpretación.",
     objetivo: { x: 2.47, y: 1.0, z: -0.54 },
@@ -125,7 +125,7 @@ const contenidos = {
   qollqas: {
     numero: "09",
     tipo: "Estación interactiva",
-    titulo: "Qollqas, LiDAR y recorrido virtual",
+    titulo: "Qollqas",
     texto:
       "La mesa interactiva reúne el levantamiento LiDAR de las qollqas con una pantalla táctil y un recorrido virtual, de manera que el visitante puede explorar la arquitectura de almacenamiento estatal a partir de los mismos datos tridimensionales que utiliza la investigación.",
     objetivo: { x: 2.6, y: 0.92, z: -2.36 },
@@ -149,7 +149,7 @@ const contenidos = {
   laminas: {
     numero: "11",
     tipo: "Dispositivo gráfico",
-    titulo: "Láminas del tabique",
+    titulo: "Los Soras e Inkarracay",
     texto:
       "Cuatro láminas impresas se ordenan en dos registros sobre el tabique que conduce al área de los santuarios y sostienen la transición entre la sección arqueológica de la muestra y su sección contemporánea.",
     objetivo: { x: 2.64, y: 1.05, z: 2.62 },
@@ -693,20 +693,41 @@ window.addEventListener(
   { passive: true },
 );
 
-const observador = new IntersectionObserver(
-  (entradas) => {
-    entradas.forEach((entrada) => {
-      entrada.target.classList.toggle("visible", entrada.isIntersecting);
-      if (!entrada.isIntersecting) return;
-      const nombre = entrada.target.dataset.paso;
-      if (nombre !== actual) enfocar(nombre);
-      if (!enMovimiento) indiceDestino = orden.indexOf(nombre);
-    });
-  },
-  { rootMargin: "-42% 0px -42% 0px", threshold: 0 },
-);
+/* Estación en curso. La correspondencia entre la ficha que se lee y la sala que
+   se mira se resuelve por proximidad y con un solo ganador. Antes la decidía un
+   observador de intersección que encendía toda sección capaz de rozar una
+   franja estrecha del centro de la pantalla, de manera que un traslado detenido
+   sobre el límite entre dos secciones, cosa que ocurría en cuanto el navegador
+   perdía un cuadro de animación mientras dibujaba la maqueta, dejaba dos fichas
+   encendidas a la vez y entregaba el rótulo y el encuadre a la que hubiera
+   entrado en último lugar, con lo que el visitante leía el texto de una estación
+   frente a la vista de la siguiente. Al elegir la sección cuyo centro queda más
+   próximo al centro de la ventana el resultado es único y continuo, no depende
+   del orden en que lleguen las notificaciones y nombra la misma estación en la
+   ficha, en la barra y en la cámara cualquiera sea el punto en que el
+   desplazamiento se detenga. */
+const secciones = [...document.querySelectorAll(".paso")];
 
-document.querySelectorAll(".paso").forEach((paso) => observador.observe(paso));
+function resolverEstacion() {
+  if (!secciones.length) return;
+  const centro = window.innerHeight / 2;
+  let elegida = secciones[0];
+  let menor = Number.POSITIVE_INFINITY;
+  secciones.forEach((seccion) => {
+    const caja = seccion.getBoundingClientRect();
+    const distancia = Math.abs(caja.top + caja.height / 2 - centro);
+    if (distancia < menor) {
+      menor = distancia;
+      elegida = seccion;
+    }
+  });
+  secciones.forEach((seccion) => seccion.classList.toggle("visible", seccion === elegida));
+  const nombre = elegida.dataset.paso;
+  if (nombre !== actual) enfocar(nombre);
+  if (!enMovimiento) indiceDestino = orden.indexOf(nombre);
+}
+
+resolverEstacion();
 
 /* Encuadre del propio bloque dentro de la página que lo aloja. Un documento
    incrustado no puede consultar la posición del marco que lo contiene cuando
@@ -801,6 +822,7 @@ window.addEventListener(
     requestAnimationFrame(() => {
       pendiente = false;
       medirAvance();
+      resolverEstacion();
     });
   },
   { passive: true },
@@ -936,6 +958,7 @@ window.addEventListener("resize", () => {
   window.clearTimeout(redimension);
   redimension = window.setTimeout(() => {
     medirAvance();
+    resolverEstacion();
     if (cargado) enfocar(actual);
   }, 220);
 });

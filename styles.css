@@ -16,10 +16,15 @@
 /* El desplazamiento suave lo gobierna el guion, que anima cuadro a cuadro con
    una duración conocida. Dejarlo también en la hoja de estilo duplicaría la
    animación de cada traslado programado y produciría el arrastre perezoso que
-   obligaba a repetir el gesto varias veces. */
+   obligaba a repetir el gesto varias veces. Por la misma razón se retiró el
+   anclaje de desplazamiento. El motor de anclaje del navegador retenía la
+   página en la estación de partida durante la primera mitad de cada traslado,
+   desatendía las posiciones que el guion le pedía cuadro a cuadro y devolvía el
+   mando cuando el recorrido ya había consumido medio trayecto, de modo que el
+   avance se detenía entre dos secciones y la ficha legible en pantalla dejaba
+   de corresponder a la vista de la sala. */
 html {
   scroll-behavior: auto;
-  scroll-snap-type: y proximity;
 }
 
 body {
@@ -182,8 +187,6 @@ h1 {
   align-items: center;
   min-height: 100svh;
   padding: 6rem clamp(1.25rem, 5vw, 4.5rem);
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
 }
 
 .ficha {
