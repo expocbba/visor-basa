@@ -1,5 +1,4 @@
 const visor = document.querySelector("#museo");
-const escena = document.querySelector(".escena");
 const relato = document.querySelector("#relato");
 const avance = document.querySelector("#avance");
 const botones = [...document.querySelectorAll("[data-estacion]")];
@@ -291,7 +290,13 @@ function enfocar(nombre) {
     boton.classList.toggle("activa", activa);
     boton.setAttribute("aria-current", activa ? "true" : "false");
     if (activa) {
-      boton.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      const barra = boton.parentElement;
+      if (barra && barra.scrollWidth > barra.clientWidth) {
+        barra.scrollTo({
+          left: boton.offsetLeft - barra.clientWidth / 2 + boton.offsetWidth / 2,
+          behavior: "smooth",
+        });
+      }
     }
   });
 
@@ -336,15 +341,60 @@ function construirRelato() {
   });
 }
 
+/* El recorrido avanza de estación en estación con una animación propia y no con
+   scrollIntoView, de modo que la duración sea conocida y el bloqueo del gesto se
+   libere justo cuando el traslado termina. El índice de destino se mantiene por
+   separado del índice observado porque durante el propio traslado la estación
+   visible cambia y no debe servir de base para el salto siguiente. */
+let indiceDestino = 0;
+let enMovimiento = false;
+let cuadro = 0;
+let finTraslado;
+
+function deslizarHasta(destinoY, duracion = 520) {
+  window.cancelAnimationFrame(cuadro);
+  window.clearTimeout(finTraslado);
+  const inicioY = window.scrollY;
+  const tope = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const meta = Math.max(0, Math.min(tope, destinoY));
+  const tramo = meta - inicioY;
+  if (Math.abs(tramo) < 1.5) {
+    enMovimiento = false;
+    return;
+  }
+  enMovimiento = true;
+  const partida = performance.now();
+  const suavizar = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const avanzar = (ahora) => {
+    const t = Math.min(1, (ahora - partida) / duracion);
+    window.scrollTo(0, inicioY + tramo * suavizar(t));
+    if (t < 1) {
+      cuadro = window.requestAnimationFrame(avanzar);
+      return;
+    }
+    finTraslado = window.setTimeout(() => {
+      enMovimiento = false;
+    }, 60);
+  };
+  cuadro = window.requestAnimationFrame(avanzar);
+}
+
+function irAIndice(indice, duracion) {
+  indiceDestino = Math.min(orden.length - 1, Math.max(0, indice));
+  const seccion = document.querySelector(`#paso-${orden[indiceDestino]}`);
+  if (!seccion) return;
+  deslizarHasta(Math.round(seccion.getBoundingClientRect().top + window.scrollY), duracion);
+}
+
 function irA(nombre) {
-  const seccion = document.querySelector(`#paso-${nombre}`);
-  if (seccion) seccion.scrollIntoView({ behavior: "smooth", block: "start" });
+  const indice = orden.indexOf(nombre);
+  if (indice < 0) return;
+  const distancia = Math.abs(indice - indiceDestino);
+  irAIndice(indice, distancia > 1 ? 760 : 520);
 }
 
 function desplazar(paso) {
-  const indice = orden.indexOf(actual);
-  const destino = Math.min(orden.length - 1, Math.max(0, indice + paso));
-  irA(orden[destino]);
+  irAIndice(indiceDestino + paso, 520);
 }
 
 function crearPuntos() {
@@ -373,6 +423,7 @@ const observador = new IntersectionObserver(
       if (!entrada.isIntersecting) return;
       const nombre = entrada.target.dataset.paso;
       if (nombre !== actual) enfocar(nombre);
+      if (!enMovimiento) indiceDestino = orden.indexOf(nombre);
     });
   },
   { rootMargin: "-42% 0px -42% 0px", threshold: 0 },
@@ -401,10 +452,40 @@ window.addEventListener(
 );
 medirAvance();
 
-/* La rueda sobre la maqueta se traduce en desplazamiento de la página. Cuando
-   el recorrido llega a su primer o a su último tramo el evento se deja pasar,
-   de manera que dentro de un bloque incrustado en StoryMaps la historia que lo
-   contiene pueda seguir desplazándose y el visitante nunca quede atrapado. */
+/* Un gesto equivale a una estación. El trackpad de macOS sigue emitiendo
+   eventos de inercia después de que los dedos se levantan, de manera que contar
+   píxeles encadenaría varios saltos con una sola pasada. Por eso el salto se
+   dispara en cuanto el desplazamiento supera un umbral mínimo y queda bloqueado
+   hasta que la corriente de eventos guarda silencio durante un instante, que es
+   la señal fiable de que el gesto terminó. En el primer y en el último tramo el
+   evento se deja pasar sin cancelar, de modo que dentro de un bloque incrustado
+   en StoryMaps la historia que lo contiene siga desplazándose y el visitante
+   nunca quede atrapado dentro del recorrido. */
+const UMBRAL_GESTO = 6;
+const SILENCIO_GESTO = 190;
+const ENFRIAMIENTO = 460;
+
+let bloqueoGesto = false;
+let acumulado = 0;
+let silencio;
+let ultimoSalto = 0;
+
+/* El bloqueo se levanta cuando se cumplen dos condiciones a la vez, que la
+   corriente de eventos haya callado y que haya transcurrido un enfriamiento
+   mínimo desde el salto anterior. La segunda condición protege el recorrido de
+   los tirones que produce el propio dibujado de la maqueta, capaces de abrir un
+   hueco largo entre dos eventos de un mismo gesto y de encadenar así dos saltos
+   donde el visitante solo hizo uno. */
+function liberarGesto() {
+  const resto = ENFRIAMIENTO - (performance.now() - ultimoSalto);
+  if (resto > 0) {
+    silencio = window.setTimeout(liberarGesto, resto);
+    return;
+  }
+  bloqueoGesto = false;
+  acumulado = 0;
+}
+
 function normalizar(evento) {
   if (evento.deltaMode === 1) return evento.deltaY * 18;
   if (evento.deltaMode === 2) return evento.deltaY * window.innerHeight;
@@ -414,15 +495,24 @@ function normalizar(evento) {
 window.addEventListener(
   "wheel",
   (evento) => {
-    const destino = evento.target;
-    if (!(destino instanceof Element) || !escena.contains(destino)) return;
+    if (evento.ctrlKey) return;
     const salto = normalizar(evento);
-    const recorrido = document.documentElement.scrollHeight - window.innerHeight;
-    const y = window.scrollY;
-    if (salto > 0 && y >= recorrido - 2) return;
-    if (salto < 0 && y <= 2) return;
+    if (Math.abs(salto) < 0.4) return;
+    const sentido = salto > 0 ? 1 : -1;
+    if (sentido > 0 && indiceDestino >= orden.length - 1) return;
+    if (sentido < 0 && indiceDestino <= 0) return;
+
     evento.preventDefault();
-    window.scrollBy(0, salto);
+    window.clearTimeout(silencio);
+    silencio = window.setTimeout(liberarGesto, SILENCIO_GESTO);
+
+    if (bloqueoGesto) return;
+    acumulado += salto;
+    if (Math.abs(acumulado) < UMBRAL_GESTO) return;
+    bloqueoGesto = true;
+    acumulado = 0;
+    ultimoSalto = performance.now();
+    desplazar(sentido);
   },
   { capture: true, passive: false },
 );
@@ -494,8 +584,75 @@ document.addEventListener("fullscreenchange", () => {
     : "Pantalla completa";
 });
 
+const adelante = new Set(["ArrowRight", "ArrowDown", "PageDown", " ", "Spacebar"]);
+const atras = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
+
 document.addEventListener("keydown", (evento) => {
-  if (evento.key === "ArrowRight" || evento.key === "PageDown") desplazar(1);
-  if (evento.key === "ArrowLeft" || evento.key === "PageUp") desplazar(-1);
-  if (evento.key === "Home" || evento.key === "Escape") irA("general");
+  if (evento.metaKey || evento.ctrlKey || evento.altKey) return;
+  if (adelante.has(evento.key)) {
+    evento.preventDefault();
+    desplazar(1);
+    return;
+  }
+  if (atras.has(evento.key)) {
+    evento.preventDefault();
+    desplazar(-1);
+    return;
+  }
+  if (evento.key === "Home" || evento.key === "Escape") {
+    evento.preventDefault();
+    irA("general");
+    return;
+  }
+  if (evento.key === "End") {
+    evento.preventDefault();
+    irA(orden[orden.length - 1]);
+  }
 });
+
+/* En pantallas táctiles el dedo se apoya casi siempre sobre la maqueta, que
+   captura el gesto para girar la mirada. El deslizamiento vertical se atiende
+   aquí de manera explícita, con un umbral holgado que distingue el arrastre
+   horizontal de la órbita del avance vertical del relato. */
+let tactoY = null;
+let tactoX = null;
+let tactoUsado = false;
+
+window.addEventListener(
+  "touchstart",
+  (evento) => {
+    if (evento.touches.length !== 1) {
+      tactoY = null;
+      return;
+    }
+    tactoY = evento.touches[0].clientY;
+    tactoX = evento.touches[0].clientX;
+    tactoUsado = false;
+  },
+  { passive: true },
+);
+
+window.addEventListener(
+  "touchmove",
+  (evento) => {
+    if (tactoY === null || tactoUsado || evento.touches.length !== 1) return;
+    const dy = tactoY - evento.touches[0].clientY;
+    const dx = tactoX - evento.touches[0].clientX;
+    if (Math.abs(dy) < 46 || Math.abs(dy) < Math.abs(dx) * 1.25) return;
+    const sentido = dy > 0 ? 1 : -1;
+    if (sentido > 0 && indiceDestino >= orden.length - 1) return;
+    if (sentido < 0 && indiceDestino <= 0) return;
+    tactoUsado = true;
+    desplazar(sentido);
+  },
+  { passive: true },
+);
+
+window.addEventListener(
+  "touchend",
+  () => {
+    tactoY = null;
+    tactoX = null;
+  },
+  { passive: true },
+);

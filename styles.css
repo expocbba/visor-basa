@@ -13,8 +13,12 @@
   box-sizing: border-box;
 }
 
+/* El desplazamiento suave lo gobierna el guion, que anima cuadro a cuadro con
+   una duración conocida. Dejarlo también en la hoja de estilo duplicaría la
+   animación de cada traslado programado y produciría el arrastre perezoso que
+   obligaba a repetir el gesto varias veces. */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scroll-snap-type: y proximity;
 }
 
@@ -178,7 +182,8 @@ h1 {
   align-items: center;
   min-height: 100svh;
   padding: 6rem clamp(1.25rem, 5vw, 4.5rem);
-  scroll-snap-align: center;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .ficha {
