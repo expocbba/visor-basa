@@ -708,6 +708,84 @@ const observador = new IntersectionObserver(
 
 document.querySelectorAll(".paso").forEach((paso) => observador.observe(paso));
 
+/* Encuadre del propio bloque dentro de la página que lo aloja. Un documento
+   incrustado no puede consultar la posición del marco que lo contiene cuando
+   ese marco pertenece a otro origen, pero el cálculo de intersección sí
+   atraviesa la jerarquía de marcos y recorta la raíz implícita con la ventana
+   superior, de modo que un testigo fijo del tamaño de la ventana interior
+   informa qué fracción del bloque está realmente a la vista del lector. Con esa
+   medida el recorrido se abstiene de capturar el gesto mientras la sala aún
+   asoma a medias, deja que la historia termine de encuadrarla y solo entonces
+   toma el mando, con lo que la vista general deja de consumirse durante el
+   mismo arrastre que trae el bloque a la pantalla. */
+const testigo = document.createElement("div");
+testigo.setAttribute("aria-hidden", "true");
+testigo.style.cssText =
+  "position:fixed;inset:0;pointer-events:none;visibility:hidden;z-index:-1";
+document.body.append(testigo);
+
+const UMBRAL_MARCO = 0.86;
+const SUELO_MARCO = 0.72;
+const DESCANSO_MARCO = 520;
+
+let visibilidad = 1;
+let techoVisible = 1;
+let enmarcado = true;
+let esperaGesto = false;
+let momentoMarco = 0;
+let hojaBloqueada = false;
+let anclaMarco = 0;
+
+/* Mientras el bloque asome a medias, la hoja del recorrido se deja sin
+   desplazamiento propio. Así la rueda no encuentra nada que mover dentro del
+   marco y se encadena hacia la página que lo aloja, que es la que debe terminar
+   de encuadrar la sala. La estación en curso se conserva y se restituye, de modo
+   que salir del bloque y volver a él no altere el punto del recorrido. */
+function bloquearHoja(activo) {
+  if (activo === hojaBloqueada) return;
+  if (activo) anclaMarco = window.scrollY;
+  hojaBloqueada = activo;
+  document.documentElement.style.overflow = activo ? "hidden" : "";
+  if (Math.abs(window.scrollY - anclaMarco) > 1) window.scrollTo(0, anclaMarco);
+}
+
+/* En una ventana más baja que el bloque la fracción visible nunca alcanza la
+   unidad, de manera que el listón se mide contra el mayor encuadre que la
+   página anfitriona haya llegado a conceder y no contra un valor absoluto. Los
+   dos umbrales, uno para tomar el mando y otro más bajo para soltarlo, evitan
+   que el recorrido oscile cuando el lector se detiene justo en el borde. */
+function liston(base) {
+  return Math.min(base, Math.max(0.45, techoVisible - (1 - base)));
+}
+
+const vigia = new IntersectionObserver(
+  (entradas) => {
+    const entrada = entradas[entradas.length - 1];
+    if (!entrada) return;
+    visibilidad = entrada.intersectionRatio;
+    if (visibilidad > techoVisible) techoVisible = visibilidad;
+    const antes = enmarcado;
+    if (!enmarcado && visibilidad >= liston(UMBRAL_MARCO)) enmarcado = true;
+    else if (enmarcado && visibilidad < liston(SUELO_MARCO)) enmarcado = false;
+    if (enmarcado === antes) return;
+    bloquearHoja(!enmarcado);
+    if (!enmarcado) return;
+    /* El bloque acaba de quedar encuadrado. Lo que reste del arrastre que lo
+       trajo hasta aquí se descarta, de modo que el visitante vea la sala
+       completa antes de que el recorrido avance de estación. */
+    esperaGesto = true;
+    momentoMarco = performance.now();
+    window.clearTimeout(silencio);
+    silencio = window.setTimeout(liberarGesto, DESCANSO_MARCO);
+  },
+  { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.72, 0.8, 0.86, 0.92, 0.97, 1] },
+);
+vigia.observe(testigo);
+
+window.addEventListener("resize", () => {
+  techoVisible = visibilidad;
+});
+
 function medirAvance() {
   const recorrido = document.documentElement.scrollHeight - window.innerHeight;
   const razon = recorrido > 0 ? window.scrollY / recorrido : 0;
@@ -759,6 +837,15 @@ function liberarGesto() {
     silencio = window.setTimeout(liberarGesto, resto);
     return;
   }
+  /* El arrastre que terminó de encuadrar el bloque se agota sin avanzar y el
+     mando solo vuelve al recorrido cuando la corriente calla y ha transcurrido
+     un descanso mínimo frente a la vista general. */
+  const asiento = DESCANSO_MARCO - (performance.now() - momentoMarco);
+  if (esperaGesto && asiento > 0) {
+    silencio = window.setTimeout(liberarGesto, asiento);
+    return;
+  }
+  esperaGesto = false;
   bloqueoGesto = false;
   acumulado = 0;
 }
@@ -785,8 +872,19 @@ window.addEventListener(
     const sentido = salto > 0 ? 1 : -1;
     if (sentido > 0 && indiceDestino >= orden.length - 1) return;
     if (sentido < 0 && indiceDestino <= 0) return;
+    /* Mientras el bloque asome a medias dentro de la historia, el gesto se
+       devuelve a la página anfitriona para que termine de encuadrar la sala. */
+    if (!enmarcado) {
+      acumulado = 0;
+      return;
+    }
 
     evento.preventDefault();
+    if (esperaGesto) {
+      window.clearTimeout(silencio);
+      silencio = window.setTimeout(liberarGesto, Math.max(SILENCIO_GESTO, DESCANSO_MARCO));
+      return;
+    }
     window.clearTimeout(silencio);
     silencio = window.setTimeout(liberarGesto, SILENCIO_GESTO);
 
@@ -931,6 +1029,9 @@ window.addEventListener(
     tactoY = evento.touches[0].clientY;
     tactoX = evento.touches[0].clientX;
     tactoUsado = false;
+    /* Un dedo que se apoya de nuevo es siempre un gesto deliberado y no el
+       resto del arrastre que trajo el bloque hasta el encuadre. */
+    if (performance.now() - momentoMarco > DESCANSO_MARCO) esperaGesto = false;
   },
   { passive: true },
 );
@@ -940,6 +1041,7 @@ window.addEventListener(
   (evento) => {
     if (piezasAbiertas) return;
     if (tactoY === null || tactoUsado || evento.touches.length !== 1) return;
+    if (esperaGesto || !enmarcado) return;
     const dy = tactoY - evento.touches[0].clientY;
     const dx = tactoX - evento.touches[0].clientX;
     if (Math.abs(dy) < 46 || Math.abs(dy) < Math.abs(dx) * 1.25) return;
