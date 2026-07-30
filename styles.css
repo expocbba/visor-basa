@@ -370,6 +370,291 @@ h1 {
   transform: scale(1.2);
 }
 
+/* Llamada a las piezas digitalizadas dentro de la ficha de la vitrina. */
+.abrir-piezas {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.95rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(199, 169, 107, 0.55);
+  border-radius: 99rem;
+  color: var(--oro);
+  background: rgba(76, 61, 36, 0.28);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease,
+    color 200ms ease,
+    transform 200ms ease;
+}
+
+.abrir-piezas::before {
+  content: "◈";
+  font-size: 0.8rem;
+  letter-spacing: 0;
+}
+
+.abrir-piezas:hover,
+.abrir-piezas:focus-visible {
+  border-color: var(--oro);
+  color: #fff;
+  background: rgba(107, 86, 48, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Visor de piezas. El panel se levanta sobre la maqueta sin ocultarla del todo,
+   de manera que la pieza digitalizada se lea como una vitrina suspendida dentro
+   de la misma sala. El velo posterior desenfoca la escena lo justo para que el
+   objeto gane figura sin perder el contexto arquitectónico. */
+.piezas {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.piezas[hidden] {
+  display: none;
+}
+
+.piezas-visible {
+  opacity: 1;
+}
+
+.piezas-velo {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 8, 7, 0.52);
+  backdrop-filter: blur(9px) saturate(0.85);
+  cursor: pointer;
+}
+
+.piezas-marco {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  width: min(62rem, 100%);
+  height: min(43rem, 100%);
+  padding: 1.35rem clamp(1rem, 2.5vw, 1.8rem) 1.1rem;
+  border: 1px solid rgba(199, 169, 107, 0.32);
+  border-radius: 0.35rem;
+  background: rgba(17, 16, 14, 0.4);
+  box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(24px) saturate(0.9);
+  transform: translateY(1.2rem) scale(0.985);
+  transition: transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.piezas-visible .piezas-marco {
+  transform: none;
+}
+
+.piezas-cabecera {
+  padding-right: 3rem;
+}
+
+.piezas-clase {
+  margin: 0;
+}
+
+.piezas-nombre {
+  margin: 0.4rem 0 0.2rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.15rem, 2.2vw, 1.7rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.piezas-detalle {
+  margin: 0;
+  color: rgba(244, 240, 232, 0.55);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.piezas-lienzo {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(244, 240, 232, 0.1);
+  border-radius: 0.25rem;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(199, 169, 107, 0.12), transparent 62%),
+    rgba(10, 9, 8, 0.28);
+}
+
+.piezas-espera {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin: 0;
+  color: rgba(244, 240, 232, 0.6);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: opacity 260ms ease;
+}
+
+.piezas-listo .piezas-espera {
+  opacity: 0;
+}
+
+.piezas-marco-3d {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.piezas-listo .piezas-marco-3d {
+  opacity: 1;
+}
+
+.piezas-pie {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.piezas-flecha {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  color: rgba(244, 240, 232, 0.82);
+  background: rgba(13, 12, 11, 0.6);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+/* La regla de presentación de la flecha pesa más que la del atributo oculto que
+   trae el navegador, así que la pieza solitaria necesita retirarla de manera
+   explícita para que el pie no muestre una navegación sin destino. */
+.piezas-flecha[hidden] {
+  display: none;
+}
+
+.piezas-flecha:hover,
+.piezas-flecha:focus-visible {
+  border-color: var(--oro);
+  color: #fff;
+  background: rgba(76, 61, 36, 0.7);
+}
+
+.piezas-puntos {
+  display: flex;
+  flex: 1;
+  gap: 0.42rem;
+  justify-content: center;
+}
+
+.piezas-punto {
+  width: 0.52rem;
+  height: 0.52rem;
+  padding: 0;
+  border: 1px solid rgba(199, 169, 107, 0.6);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 200ms ease,
+    transform 200ms ease;
+}
+
+.piezas-punto-activo {
+  background: var(--oro);
+  transform: scale(1.25);
+}
+
+.piezas-enlace {
+  flex: none;
+  padding-bottom: 0.12rem;
+  border-bottom: 1px solid rgba(199, 169, 107, 0.4);
+  color: rgba(244, 240, 232, 0.6);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.piezas-enlace:hover,
+.piezas-enlace:focus-visible {
+  color: var(--oro);
+}
+
+.piezas-cerrar {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  color: rgba(244, 240, 232, 0.8);
+  background: rgba(13, 12, 11, 0.62);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    background 180ms ease;
+}
+
+.piezas-cerrar:hover,
+.piezas-cerrar:focus-visible {
+  border-color: var(--oro);
+  color: #fff;
+  background: rgba(107, 86, 48, 0.7);
+}
+
+body.con-piezas .estaciones,
+body.con-piezas .acciones {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* El documento deja de desplazarse mientras la vitrina digital está abierta. La
+   posición vertical se conserva, de manera que al cerrar el panel el recorrido
+   reaparezca en la misma estación y ningún arrastre encadenado desde el bloque
+   incrustado arrastre la sala por debajo. */
+html.con-piezas {
+  overflow: hidden;
+}
+
 /* Vista acotada. En pantallas estrechas la ficha se ancla al pie, sobre la
    barra de estaciones, y deja libre la mitad superior para la maqueta. */
 @media (max-width: 860px) {
@@ -425,6 +710,50 @@ h1 {
     width: 1.35rem;
     height: 1.35rem;
     font-size: 0.55rem;
+  }
+
+  /* En el teléfono la pieza ocupa la pantalla completa, con el pie repartido en
+     dos filas para que la navegación entre modelos y el enlace a la ficha
+     original quepan sin comprimir el lienzo tridimensional. */
+  .piezas {
+    padding: 0;
+  }
+
+  .piezas-marco {
+    width: 100%;
+    height: 100%;
+    padding: max(0.9rem, env(safe-area-inset-top)) 0.9rem
+      max(0.9rem, env(safe-area-inset-bottom));
+    border: 0;
+    border-radius: 0;
+    gap: 0.7rem;
+  }
+
+  .piezas-cabecera {
+    padding-right: 2.6rem;
+  }
+
+  .piezas-nombre {
+    font-size: 1.15rem;
+  }
+
+  .piezas-detalle {
+    font-size: 0.72rem;
+  }
+
+  .piezas-pie {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.55rem;
+  }
+
+  .piezas-puntos {
+    order: 3;
+    flex: 1 0 100%;
+  }
+
+  .piezas-enlace {
+    margin-left: auto;
   }
 }
 

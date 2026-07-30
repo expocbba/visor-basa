@@ -182,6 +182,74 @@ const contenidos = {
   },
 };
 
+/* Piezas digitalizadas. Los modelos fotogramétricos alojados en Sketchfab por
+   el perfil altamerikanistik se incorporan como bloques incrustados que quedan
+   asociados a la vitrina donde se exhibe el original, la jarra de doble asa a
+   la vitrina central y el resto del conjunto a las vitrinas de materialidad.
+   Los nombres se conservan tal como fueron catalogados, con su código de
+   inventario, de manera que la ficha del recorrido y el registro arqueológico
+   digan lo mismo. */
+const piezas = {
+  aribalos: {
+    rotulo: "Ver la jarra de doble asa en 3D",
+    clase: "Pieza digitalizada · vitrina central",
+    lista: [
+      {
+        nombre: "Jarra de doble asa",
+        detalle: "Double-handled pitcher",
+        uid: "7ccc653873df4e15af7e1b4725dcd41b",
+        enlace:
+          "https://sketchfab.com/3d-models/jarra-de-doble-asa-double-handled-pitcher-7ccc653873df4e15af7e1b4725dcd41b",
+      },
+    ],
+  },
+  materialidad: {
+    rotulo: "Ver las seis piezas en 3D",
+    clase: "Piezas digitalizadas · vitrinas de materialidad",
+    lista: [
+      {
+        nombre: "QU-239-84 (bolsa 404)",
+        detalle: "Fotogrametría de pieza cerámica",
+        uid: "b62c9354775f4ecda5490e1577202d3b",
+        enlace: "https://sketchfab.com/3d-models/qu-239-84-bolsa-404-b62c9354775f4ecda5490e1577202d3b",
+      },
+      {
+        nombre: "QU-239-E1A (bolsa 512)",
+        detalle: "Fotogrametría de pieza cerámica",
+        uid: "ef6eac882c3246278f20e06475a6bb1b",
+        enlace: "https://sketchfab.com/3d-models/qu-239-e1a-bolsa-512-ef6eac882c3246278f20e06475a6bb1b",
+      },
+      {
+        nombre: "QU-239-E4-10 (bolsa 469)",
+        detalle: "Fotogrametría de pieza cerámica",
+        uid: "97f4dc3d644f447ab71856ad5145afaa",
+        enlace:
+          "https://sketchfab.com/3d-models/qu-239-e4-10-bolsa-469-97f4dc3d644f447ab71856ad5145afaa",
+      },
+      {
+        nombre: "QU-245-1 (Lari Kasa, Vasija Alberto)",
+        detalle: "Fotogrametría de pieza cerámica",
+        uid: "3a66ace0e7114fb2b6c94838c06e7ee0",
+        enlace:
+          "https://sketchfab.com/3d-models/qu-245-1-lari-kasa-vasija-alberto-3a66ace0e7114fb2b6c94838c06e7ee0",
+      },
+      {
+        nombre: "QU-245-2 (Lari Kasa, vasija Alberto 2)",
+        detalle: "Fotogrametría de pieza cerámica",
+        uid: "acd125a07c014efb9b423c50c5b0b590",
+        enlace:
+          "https://sketchfab.com/3d-models/qu-245-2-lari-kasa-vasija-alberto-2-acd125a07c014efb9b423c50c5b0b590",
+      },
+      {
+        nombre: "Vasija Alberto 2",
+        detalle: "Fotogrametría de pieza cerámica",
+        uid: "faa52379f9e5465d973ddc1eabdb8462",
+        enlace: "https://sketchfab.com/3d-models/vasija-alberto-2-faa52379f9e5465d973ddc1eabdb8462",
+      },
+    ],
+  },
+};
+
 const orden = Object.keys(contenidos);
 let actual = "general";
 let cargado = false;
@@ -335,6 +403,17 @@ function construirRelato() {
     cuerpo.textContent = estacion.texto;
 
     bloque.append(clase, rotulo, cuerpo);
+
+    const grupo = piezas[nombre];
+    if (grupo) {
+      const llamada = document.createElement("button");
+      llamada.type = "button";
+      llamada.className = "abrir-piezas";
+      llamada.textContent = grupo.rotulo;
+      llamada.addEventListener("click", () => abrirPiezas(nombre, llamada));
+      bloque.append(llamada);
+    }
+
     ficha.append(cifra, bloque);
     seccion.append(ficha);
     relato.append(seccion);
@@ -426,6 +505,194 @@ function crearPuntos() {
 
 construirRelato();
 
+/* Visor de piezas. El bloque incrustado de Sketchfab se pide transparente y sin
+   los rótulos del servicio, de manera que la pieza aparezca suspendida sobre la
+   sala y no dentro de una ventana ajena al recorrido. El atributo src se asigna
+   únicamente cuando el visitante abre el panel y se retira al cerrarlo, para
+   que siete visores tridimensionales no queden dibujándose en segundo plano ni
+   consuman datos en un teléfono. */
+function urlPieza(uid) {
+  const parametros = new URLSearchParams({
+    autostart: "1",
+    autospin: "0.2",
+    preload: "0",
+    transparent: "1",
+    ui_theme: "dark",
+    ui_infos: "0",
+    ui_hint: "0",
+    ui_ar: "0",
+    ui_help: "0",
+    ui_settings: "0",
+    ui_inspector: "0",
+    ui_vr: "0",
+    dnt: "1",
+  });
+  return `https://sketchfab.com/models/${uid}/embed?${parametros.toString()}`;
+}
+
+const capa = document.createElement("div");
+capa.className = "piezas";
+capa.hidden = true;
+capa.setAttribute("role", "dialog");
+capa.setAttribute("aria-modal", "true");
+capa.setAttribute("aria-label", "Piezas digitalizadas en tres dimensiones");
+capa.innerHTML = `
+  <div class="piezas-velo" data-cerrar></div>
+  <div class="piezas-marco">
+    <button class="piezas-cerrar" type="button" aria-label="Cerrar el visor de piezas">×</button>
+    <header class="piezas-cabecera">
+      <p class="clase piezas-clase"></p>
+      <h3 class="piezas-nombre"></h3>
+      <p class="piezas-detalle"></p>
+    </header>
+    <div class="piezas-lienzo">
+      <p class="piezas-espera"><span class="pulso"></span>Cargando la pieza</p>
+      <iframe
+        class="piezas-marco-3d"
+        title="Pieza digitalizada"
+        allow="autoplay; fullscreen; xr-spatial-tracking"
+        allowfullscreen
+        loading="lazy"
+      ></iframe>
+    </div>
+    <footer class="piezas-pie">
+      <button class="piezas-flecha piezas-anterior" type="button" aria-label="Pieza anterior">‹</button>
+      <div class="piezas-puntos"></div>
+      <button class="piezas-flecha piezas-siguiente" type="button" aria-label="Pieza siguiente">›</button>
+      <a class="piezas-enlace" target="_blank" rel="noopener noreferrer">Ficha en Sketchfab</a>
+    </footer>
+  </div>
+`;
+document.body.append(capa);
+
+const marco3d = capa.querySelector(".piezas-marco-3d");
+const lienzoPieza = capa.querySelector(".piezas-lienzo");
+const rotuloClase = capa.querySelector(".piezas-clase");
+const rotuloNombre = capa.querySelector(".piezas-nombre");
+const rotuloDetalle = capa.querySelector(".piezas-detalle");
+const puntosPieza = capa.querySelector(".piezas-puntos");
+const enlacePieza = capa.querySelector(".piezas-enlace");
+const flechaAnterior = capa.querySelector(".piezas-anterior");
+const flechaSiguiente = capa.querySelector(".piezas-siguiente");
+
+let coleccion = null;
+let indicePieza = 0;
+let piezasAbiertas = false;
+let disparador = null;
+let anclaPiezas = 0;
+
+function pintarPuntos() {
+  puntosPieza.textContent = "";
+  if (!coleccion || coleccion.lista.length < 2) return;
+  coleccion.lista.forEach((pieza, indice) => {
+    const punto = document.createElement("button");
+    punto.type = "button";
+    punto.className = "piezas-punto";
+    punto.setAttribute("aria-label", pieza.nombre);
+    punto.classList.toggle("piezas-punto-activo", indice === indicePieza);
+    punto.addEventListener("click", () => mostrarPieza(indice));
+    puntosPieza.append(punto);
+  });
+}
+
+function mostrarPieza(indice) {
+  if (!coleccion) return;
+  const total = coleccion.lista.length;
+  indicePieza = (indice + total) % total;
+  const pieza = coleccion.lista[indicePieza];
+  rotuloClase.textContent =
+    total > 1 ? `${coleccion.clase} · ${indicePieza + 1} de ${total}` : coleccion.clase;
+  rotuloNombre.textContent = pieza.nombre;
+  rotuloDetalle.textContent = pieza.detalle ?? "";
+  enlacePieza.href = pieza.enlace;
+  marco3d.title = pieza.nombre;
+  /* El bloque incrustado permanece invisible hasta que el servicio responde, de
+     manera que el visitante vea el fondo oscuro de la vitrina y no el rectángulo
+     blanco con que el navegador rellena un documento ajeno todavía sin cargar,
+     que rompería la continuidad de la sala en el instante del cambio de pieza. */
+  lienzoPieza.classList.remove("piezas-listo");
+  marco3d.src = urlPieza(pieza.uid);
+  const solitaria = total < 2;
+  flechaAnterior.hidden = solitaria;
+  flechaSiguiente.hidden = solitaria;
+  pintarPuntos();
+  anunciar(`Pieza ${indicePieza + 1} de ${total}, ${pieza.nombre}`);
+}
+
+function pasarPieza(paso) {
+  if (!coleccion || coleccion.lista.length < 2) return;
+  mostrarPieza(indicePieza + paso);
+}
+
+function abrirPiezas(clave, origen) {
+  const grupo = piezas[clave];
+  if (!grupo) return;
+  coleccion = grupo;
+  disparador = origen ?? null;
+  piezasAbiertas = true;
+  /* La vitrina digital se abre desde una estación asentada. Si el traslado
+     anterior seguía en curso, se resuelve de un golpe antes de fijar el ancla,
+     de manera que el panel guarde la posición exacta de la sala y no un punto
+     intermedio entre dos estaciones, que es donde el recorrido reaparecería al
+     cerrar si el ancla se tomara mientras la página todavía se desliza. */
+  const asiento = document.querySelector(`#paso-${orden[indiceDestino]}`);
+  if (asiento) {
+    window.cancelAnimationFrame(cuadro);
+    window.clearTimeout(finTraslado);
+    enMovimiento = false;
+    window.scrollTo(0, Math.round(asiento.getBoundingClientRect().top + window.scrollY));
+  }
+  anclaPiezas = window.scrollY;
+  capa.hidden = false;
+  document.documentElement.classList.add("con-piezas");
+  document.body.classList.add("con-piezas");
+  window.requestAnimationFrame(() => capa.classList.add("piezas-visible"));
+  mostrarPieza(0);
+  capa.querySelector(".piezas-cerrar").focus({ preventScroll: true });
+}
+
+function cerrarPiezas() {
+  if (!piezasAbiertas) return;
+  piezasAbiertas = false;
+  capa.classList.remove("piezas-visible");
+  document.documentElement.classList.remove("con-piezas");
+  document.body.classList.remove("con-piezas");
+  marco3d.removeAttribute("src");
+  window.scrollTo(0, anclaPiezas);
+  window.setTimeout(() => {
+    if (!piezasAbiertas) capa.hidden = true;
+  }, 260);
+  if (disparador) disparador.focus({ preventScroll: true });
+  disparador = null;
+  coleccion = null;
+}
+
+marco3d.addEventListener("load", () => {
+  if (marco3d.getAttribute("src")) lienzoPieza.classList.add("piezas-listo");
+});
+
+capa.querySelector(".piezas-cerrar").addEventListener("click", cerrarPiezas);
+capa.querySelector("[data-cerrar]").addEventListener("click", cerrarPiezas);
+flechaAnterior.addEventListener("click", () => pasarPieza(-1));
+flechaSiguiente.addEventListener("click", () => pasarPieza(1));
+capa.addEventListener("wheel", (evento) => evento.preventDefault(), { passive: false });
+
+/* Ancla del recorrido. El bloque incrustado de Sketchfab pertenece a otro
+   origen, de manera que la rueda que cae sobre la pieza la atiende el documento
+   ajeno y el recorrido no puede impedirla desde fuera. Mientras el panel esté
+   abierto el documento queda sin desplazamiento por hoja de estilo y cualquier
+   arrastre residual devuelve la página a la estación desde la que se abrió la
+   vitrina, de modo que al cerrar el visitante encuentre la sala donde la dejó. */
+window.addEventListener(
+  "scroll",
+  () => {
+    if (!piezasAbiertas) return;
+    if (Math.abs(window.scrollY - anclaPiezas) < 1) return;
+    window.scrollTo(0, anclaPiezas);
+  },
+  { passive: true },
+);
+
 const observador = new IntersectionObserver(
   (entradas) => {
     entradas.forEach((entrada) => {
@@ -506,6 +773,13 @@ window.addEventListener(
   "wheel",
   (evento) => {
     if (evento.ctrlKey) return;
+    /* Con el visor de piezas abierto el recorrido queda detenido, de modo que
+       la rueda gire la pieza dentro del bloque incrustado sin que la estación
+       cambie por debajo del panel. */
+    if (piezasAbiertas) {
+      evento.preventDefault();
+      return;
+    }
     const salto = normalizar(evento);
     if (Math.abs(salto) < 0.4) return;
     const sentido = salto > 0 ? 1 : -1;
@@ -599,6 +873,25 @@ const atras = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
 
 document.addEventListener("keydown", (evento) => {
   if (evento.metaKey || evento.ctrlKey || evento.altKey) return;
+  if (piezasAbiertas) {
+    if (evento.key === "Escape") {
+      evento.preventDefault();
+      cerrarPiezas();
+      return;
+    }
+    if (evento.key === "ArrowRight") {
+      evento.preventDefault();
+      pasarPieza(1);
+      return;
+    }
+    if (evento.key === "ArrowLeft") {
+      evento.preventDefault();
+      pasarPieza(-1);
+      return;
+    }
+    if (adelante.has(evento.key) || atras.has(evento.key)) evento.preventDefault();
+    return;
+  }
   if (adelante.has(evento.key)) {
     evento.preventDefault();
     desplazar(1);
@@ -645,6 +938,7 @@ window.addEventListener(
 window.addEventListener(
   "touchmove",
   (evento) => {
+    if (piezasAbiertas) return;
     if (tactoY === null || tactoUsado || evento.touches.length !== 1) return;
     const dy = tactoY - evento.touches[0].clientY;
     const dx = tactoX - evento.touches[0].clientX;
