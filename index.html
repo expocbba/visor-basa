@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Recorrido inmersivo del Museo BASA: Landscapes in Transformation."
+    />
+    <meta name="theme-color" content="#171613" />
+    <title>Landscapes in Transformation · Museo BASA 3D</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module">
+      import { ModelViewerElement } from "./model-viewer.min.js";
+      ModelViewerElement.dracoDecoderLocation = new URL(
+        "./",
+        document.baseURI,
+      ).href;
+      await import("./app.js");
+    </script>
+  </head>
+  <body>
+    <div class="escena">
+      <model-viewer
+        id="museo"
+        src="./modelo.glb"
+        alt="Maqueta tridimensional de la exposición Landscapes in Transformation en el Museo BASA"
+        camera-controls
+        disable-zoom
+        disable-pan
+        touch-action="pan-y"
+        interaction-prompt="none"
+        shadow-intensity="0.72"
+        shadow-softness="0.85"
+        environment-image="neutral"
+        exposure="1.08"
+        tone-mapping="aces"
+        min-field-of-view="16deg"
+        max-field-of-view="58deg"
+        interpolation-decay="90"
+      >
+        <div class="cargando" slot="poster">
+          <span class="pulso"></span>
+          <span id="aviso">Cargando museo 3D</span>
+        </div>
+      </model-viewer>
+
+      <header class="cabecera">
+        <p class="sobrelinea">Museo BASA · Cochabamba</p>
+        <h1>Landscapes<br />in Transformation</h1>
+        <p class="subtitulo">The Cochabamba Valley Beyond the Incas</p>
+        <p class="invitacion">Desliza para recorrer la exposición</p>
+      </header>
+    </div>
+
+    <div class="progreso"><span id="avance"></span></div>
+
+    <div class="acciones">
+      <button id="anterior" aria-label="Estación anterior">‹</button>
+      <button id="siguiente" aria-label="Estación siguiente">›</button>
+      <button id="pantalla">Pantalla completa</button>
+    </div>
+
+    <nav class="estaciones" aria-label="Estaciones del recorrido">
+      <button class="estacion activa" data-estacion="general">
+        <span>00</span><strong>Vista general</strong>
+      </button>
+      <button class="estacion" data-estacion="introduccion">
+        <span>01</span><strong>Introducción</strong>
+      </button>
+      <button class="estacion" data-estacion="repartimiento">
+        <span>02</span><strong>Repartimiento</strong>
+      </button>
+      <button class="estacion" data-estacion="documentos">
+        <span>03</span><strong>Documentos coloniales</strong>
+      </button>
+      <button class="estacion" data-estacion="camino">
+        <span>04</span><strong>Camino inka y suyus</strong>
+      </button>
+      <button class="estacion" data-estacion="soras">
+        <span>05</span><strong>Soras y mapa de Alexis</strong>
+      </button>
+      <button class="estacion" data-estacion="documental">
+        <span>06</span><strong>Documental</strong>
+      </button>
+      <button class="estacion" data-estacion="aribalos">
+        <span>07</span><strong>Vitrina de aríbalos</strong>
+      </button>
+      <button class="estacion" data-estacion="materialidad">
+        <span>08</span><strong>Materialidad real</strong>
+      </button>
+      <button class="estacion" data-estacion="qollqas">
+        <span>09</span><strong>Qollqas y LiDAR</strong>
+      </button>
+      <button class="estacion" data-estacion="maiz">
+        <span>10</span><strong>Maíz y chicha</strong>
+      </button>
+      <button class="estacion" data-estacion="laminas">
+        <span>11</span><strong>Láminas del tabique</strong>
+      </button>
+      <button class="estacion" data-estacion="santuarios">
+        <span>12</span><strong>Santuarios</strong>
+      </button>
+      <button class="estacion" data-estacion="creditos">
+        <span>13</span><strong>Impressum</strong>
+      </button>
+    </nav>
+
+    <main class="relato" id="relato" aria-label="Recorrido narrado"></main>
+  </body>
+</html>
