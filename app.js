@@ -363,6 +363,15 @@ function deslizarHasta(destinoY, duracion = 520) {
     return;
   }
   enMovimiento = true;
+  /* Red de seguridad. Si el navegador deja de entregar cuadros de animación,
+     algo que ocurre cuando la pestaña pasa a segundo plano o cuando el dibujado
+     de la maqueta se atasca, el traslado se resuelve de un solo golpe y el
+     recorrido nunca queda detenido a mitad de camino entre dos estaciones. */
+  finTraslado = window.setTimeout(() => {
+    window.cancelAnimationFrame(cuadro);
+    window.scrollTo(0, meta);
+    enMovimiento = false;
+  }, duracion + 300);
   const partida = performance.now();
   const suavizar = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const avanzar = (ahora) => {
@@ -372,6 +381,7 @@ function deslizarHasta(destinoY, duracion = 520) {
       cuadro = window.requestAnimationFrame(avanzar);
       return;
     }
+    window.clearTimeout(finTraslado);
     finTraslado = window.setTimeout(() => {
       enMovimiento = false;
     }, 60);
