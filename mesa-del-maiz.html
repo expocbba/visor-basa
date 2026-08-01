@@ -211,6 +211,19 @@ header p.baja{font-family:var(--serif);font-style:italic;color:var(--tenue);
   .escena.foco .cartela{transform:none}
   .cartela nav{padding-top:20px}
 }
+/* --- alturas cortas, contexto de iframe incrustado --- */
+@media (max-height:640px){
+  :root{--h:clamp(150px,34vh,300px)}
+  header{padding:clamp(12px,1.8vh,22px) clamp(20px,4vw,70px) 0}
+  header h1{font-size:clamp(26px,4.2vw,52px);margin:.18em 0 .10em}
+  header .regla{margin:clamp(6px,1vh,12px) 0 clamp(5px,.8vh,9px)}
+  header p.baja{font-size:clamp(12px,1.25vw,17px)}
+  .mesa{min-height:calc(var(--h) + 128px)}
+  .fila{padding-bottom:102px}
+  .canto{bottom:102px}
+  .pista{bottom:34px;font-size:10px}
+  .escena.foco .obj.on{transform:translateY(-14px) scale(1.10)}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -230,7 +243,7 @@ header p.baja{font-family:var(--serif);font-style:italic;color:var(--tenue);
     <div class="plano"></div>
     <div class="canto"></div>
     <div class="fila" id="fila"></div>
-    <div class="esp pista" id="pista">Toque una pieza para acercarse</div>
+    <div class="esp pista" id="pista">Haga clic o toque una pieza para acercarse</div>
   </div>
 
   <aside class="cartela" id="cartela" aria-live="polite">
