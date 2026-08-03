@@ -44,13 +44,6 @@
           <span id="aviso">Cargando museo 3D</span>
         </div>
       </model-viewer>
-
-      <header class="cabecera">
-        <p class="sobrelinea">Museo BASA · Cochabamba</p>
-        <h1>Landscapes<br />in Transformation</h1>
-        <p class="subtitulo">The Cochabamba Valley Beyond the Incas</p>
-        <p class="invitacion">Desliza para recorrer la exposición</p>
-      </header>
     </div>
 
     <div class="progreso"><span id="avance"></span></div>
@@ -107,5 +100,19 @@
     </nav>
 
     <main class="relato" id="relato" aria-label="Recorrido narrado"></main>
+
+    <div class="portada" id="portada" role="dialog" aria-label="Entrada al recorrido">
+      <div class="portada-marco">
+        <p class="sobrelinea">Museo BASA · Cochabamba</p>
+        <h1>Landscapes<br />in Transformation</h1>
+        <p class="subtitulo">The Cochabamba Valley Beyond the Incas</p>
+        <button class="entrar" id="entrar" type="button">Haz clic para entrar</button>
+        <p class="aviso-uso">
+          Haz clic sobre la maqueta y arrastra para girar la vista. Desplázate para avanzar de una
+          estación a la siguiente.
+        </p>
+        <p class="portada-estado" id="portada-estado">Cargando museo 3D</p>
+      </div>
+    </div>
   </body>
 </html>

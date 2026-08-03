@@ -6,12 +6,12 @@ const pantalla = document.querySelector("#pantalla");
 const anterior = document.querySelector("#anterior");
 const siguiente = document.querySelector("#siguiente");
 const aviso = document.querySelector("#aviso");
+const portada = document.querySelector("#portada");
+const entrar = document.querySelector("#entrar");
+const estadoPortada = document.querySelector("#portada-estado");
 
-/* Coordenadas tomadas de los nodos reales del archivo modelo.glb.
-   El acimut se calcula desde la normal de cada muro o vitrina, de modo que
-   la cámara siempre observe la pieza desde el interior de la sala. La
-   propiedad tope fija la distancia máxima admisible cuando el encuadre debe
-   ampliarse en pantallas estrechas, allí donde un mueble se interpone. */
+let iniciado = false;
+
 const contenidos = {
   general: {
     numero: "00",
@@ -182,13 +182,6 @@ const contenidos = {
   },
 };
 
-/* Piezas digitalizadas. Los modelos fotogramétricos alojados en Sketchfab por
-   el perfil altamerikanistik se incorporan como bloques incrustados que quedan
-   asociados a la vitrina donde se exhibe el original, la jarra de doble asa a
-   la vitrina central y el resto del conjunto a las vitrinas de materialidad.
-   Los nombres se conservan tal como fueron catalogados, con su código de
-   inventario, de manera que la ficha del recorrido y el registro arqueológico
-   digan lo mismo. */
 const piezas = {
   aribalos: {
     rotulo: "Ver la jarra de doble asa en 3D",
@@ -257,14 +250,9 @@ let telon = [];
 
 function anunciar(mensaje) {
   if (aviso) aviso.textContent = mensaje;
+  if (estadoPortada && !iniciado) estadoPortada.textContent = mensaje;
 }
 
-/* Encuadre adaptado a la proporción disponible. El campo de visión declarado
-   por model-viewer es vertical, de manera que una ventana estrecha y alta,
-   como la de un teléfono o la de un bloque incrustado en StoryMaps, recorta el
-   ancho de los paneles. Se compensa ampliando moderadamente el campo, alejando
-   la cámara dentro del límite que permite el mobiliario y ensanchando el giro
-   lateral admitido, para que la mirada complete lo que la pantalla no abarca. */
 function ajuste() {
   const ancho = visor.clientWidth || window.innerWidth || 1;
   const alto = visor.clientHeight || window.innerHeight || 1;
@@ -274,12 +262,6 @@ function ajuste() {
   return { escala: 1.3, extra: 13, giro: 46 };
 }
 
-/* El lienzo del documental comparte material con los soportes traseros del
-   mapa de Alexis y del texto sobre los soras. El paso de compilación
-   parche-telon.mjs le asigna un material propio llamado BASA_Documentary_Screen
-   y sólo ese material, junto al de la fotografía que lo acompaña, se vuelve
-   translúcido. Si el archivo no trae el material separado, no se altera nada,
-   de modo que ningún panel pierda su opacidad por error. */
 const nombresTelon = ["BASA_Documentary_Screen", "BASA_Documentary_Thumbnail_Material"];
 
 function prepararTelon() {
@@ -312,9 +294,6 @@ function velarTelon(nombre) {
   });
 }
 
-/* Alcanzada la estación, la navegación se restringe al radio de acción de un
-   visitante detenido frente a la pieza. Conserva el giro lateral y la
-   inclinación de la mirada, pierde el desplazamiento libre por la sala. */
 function limitar(nombre, estacion, distancia, campo, giro) {
   visor.minCameraOrbit = "-2000deg 0deg 0.2m";
   visor.maxFieldOfView = "58deg";
@@ -373,10 +352,6 @@ function enfocar(nombre) {
   });
 }
 
-/* El relato se compone en secciones de una pantalla de alto. El desplazamiento
-   vertical, venga de la rueda, del trackpad o del dedo, es el único motor del
-   recorrido, de manera que la lectura avance con la lógica de cualquier página
-   y no con un gesto que haya que aprender. */
 function construirRelato() {
   orden.forEach((nombre) => {
     const estacion = contenidos[nombre];
@@ -420,11 +395,6 @@ function construirRelato() {
   });
 }
 
-/* El recorrido avanza de estación en estación con una animación propia y no con
-   scrollIntoView, de modo que la duración sea conocida y el bloqueo del gesto se
-   libere justo cuando el traslado termina. El índice de destino se mantiene por
-   separado del índice observado porque durante el propio traslado la estación
-   visible cambia y no debe servir de base para el salto siguiente. */
 let indiceDestino = 0;
 let enMovimiento = false;
 let cuadro = 0;
@@ -442,10 +412,6 @@ function deslizarHasta(destinoY, duracion = 520) {
     return;
   }
   enMovimiento = true;
-  /* Red de seguridad. Si el navegador deja de entregar cuadros de animación,
-     algo que ocurre cuando la pestaña pasa a segundo plano o cuando el dibujado
-     de la maqueta se atasca, el traslado se resuelve de un solo golpe y el
-     recorrido nunca queda detenido a mitad de camino entre dos estaciones. */
   finTraslado = window.setTimeout(() => {
     window.cancelAnimationFrame(cuadro);
     window.scrollTo(0, meta);
@@ -505,12 +471,6 @@ function crearPuntos() {
 
 construirRelato();
 
-/* Visor de piezas. El bloque incrustado de Sketchfab se pide transparente y sin
-   los rótulos del servicio, de manera que la pieza aparezca suspendida sobre la
-   sala y no dentro de una ventana ajena al recorrido. El atributo src se asigna
-   únicamente cuando el visitante abre el panel y se retira al cerrarlo, para
-   que siete visores tridimensionales no queden dibujándose en segundo plano ni
-   consuman datos en un teléfono. */
 function urlPieza(uid) {
   const parametros = new URLSearchParams({
     autostart: "1",
@@ -559,7 +519,6 @@ capa.innerHTML = `
       <button class="piezas-flecha piezas-anterior" type="button" aria-label="Pieza anterior">‹</button>
       <div class="piezas-puntos"></div>
       <button class="piezas-flecha piezas-siguiente" type="button" aria-label="Pieza siguiente">›</button>
-      <a class="piezas-enlace" target="_blank" rel="noopener noreferrer">Ficha en Sketchfab</a>
     </footer>
   </div>
 `;
@@ -571,7 +530,6 @@ const rotuloClase = capa.querySelector(".piezas-clase");
 const rotuloNombre = capa.querySelector(".piezas-nombre");
 const rotuloDetalle = capa.querySelector(".piezas-detalle");
 const puntosPieza = capa.querySelector(".piezas-puntos");
-const enlacePieza = capa.querySelector(".piezas-enlace");
 const flechaAnterior = capa.querySelector(".piezas-anterior");
 const flechaSiguiente = capa.querySelector(".piezas-siguiente");
 
@@ -604,12 +562,7 @@ function mostrarPieza(indice) {
     total > 1 ? `${coleccion.clase} · ${indicePieza + 1} de ${total}` : coleccion.clase;
   rotuloNombre.textContent = pieza.nombre;
   rotuloDetalle.textContent = pieza.detalle ?? "";
-  enlacePieza.href = pieza.enlace;
   marco3d.title = pieza.nombre;
-  /* El bloque incrustado permanece invisible hasta que el servicio responde, de
-     manera que el visitante vea el fondo oscuro de la vitrina y no el rectángulo
-     blanco con que el navegador rellena un documento ajeno todavía sin cargar,
-     que rompería la continuidad de la sala en el instante del cambio de pieza. */
   lienzoPieza.classList.remove("piezas-listo");
   marco3d.src = urlPieza(pieza.uid);
   const solitaria = total < 2;
@@ -630,11 +583,6 @@ function abrirPiezas(clave, origen) {
   coleccion = grupo;
   disparador = origen ?? null;
   piezasAbiertas = true;
-  /* La vitrina digital se abre desde una estación asentada. Si el traslado
-     anterior seguía en curso, se resuelve de un golpe antes de fijar el ancla,
-     de manera que el panel guarde la posición exacta de la sala y no un punto
-     intermedio entre dos estaciones, que es donde el recorrido reaparecería al
-     cerrar si el ancla se tomara mientras la página todavía se desliza. */
   const asiento = document.querySelector(`#paso-${orden[indiceDestino]}`);
   if (asiento) {
     window.cancelAnimationFrame(cuadro);
@@ -677,12 +625,6 @@ flechaAnterior.addEventListener("click", () => pasarPieza(-1));
 flechaSiguiente.addEventListener("click", () => pasarPieza(1));
 capa.addEventListener("wheel", (evento) => evento.preventDefault(), { passive: false });
 
-/* Ancla del recorrido. El bloque incrustado de Sketchfab pertenece a otro
-   origen, de manera que la rueda que cae sobre la pieza la atiende el documento
-   ajeno y el recorrido no puede impedirla desde fuera. Mientras el panel esté
-   abierto el documento queda sin desplazamiento por hoja de estilo y cualquier
-   arrastre residual devuelve la página a la estación desde la que se abrió la
-   vitrina, de modo que al cerrar el visitante encuentre la sala donde la dejó. */
 window.addEventListener(
   "scroll",
   () => {
@@ -693,19 +635,6 @@ window.addEventListener(
   { passive: true },
 );
 
-/* Estación en curso. La correspondencia entre la ficha que se lee y la sala que
-   se mira se resuelve por proximidad y con un solo ganador. Antes la decidía un
-   observador de intersección que encendía toda sección capaz de rozar una
-   franja estrecha del centro de la pantalla, de manera que un traslado detenido
-   sobre el límite entre dos secciones, cosa que ocurría en cuanto el navegador
-   perdía un cuadro de animación mientras dibujaba la maqueta, dejaba dos fichas
-   encendidas a la vez y entregaba el rótulo y el encuadre a la que hubiera
-   entrado en último lugar, con lo que el visitante leía el texto de una estación
-   frente a la vista de la siguiente. Al elegir la sección cuyo centro queda más
-   próximo al centro de la ventana el resultado es único y continuo, no depende
-   del orden en que lleguen las notificaciones y nombra la misma estación en la
-   ficha, en la barra y en la cámara cualquiera sea el punto en que el
-   desplazamiento se detenga. */
 const secciones = [...document.querySelectorAll(".paso")];
 
 function resolverEstacion() {
@@ -729,16 +658,6 @@ function resolverEstacion() {
 
 resolverEstacion();
 
-/* Encuadre del propio bloque dentro de la página que lo aloja. Un documento
-   incrustado no puede consultar la posición del marco que lo contiene cuando
-   ese marco pertenece a otro origen, pero el cálculo de intersección sí
-   atraviesa la jerarquía de marcos y recorta la raíz implícita con la ventana
-   superior, de modo que un testigo fijo del tamaño de la ventana interior
-   informa qué fracción del bloque está realmente a la vista del lector. Con esa
-   medida el recorrido se abstiene de capturar el gesto mientras la sala aún
-   asoma a medias, deja que la historia termine de encuadrarla y solo entonces
-   toma el mando, con lo que la vista general deja de consumirse durante el
-   mismo arrastre que trae el bloque a la pantalla. */
 const testigo = document.createElement("div");
 testigo.setAttribute("aria-hidden", "true");
 testigo.style.cssText =
@@ -757,24 +676,20 @@ let momentoMarco = 0;
 let hojaBloqueada = false;
 let anclaMarco = 0;
 
-/* Mientras el bloque asome a medias, la hoja del recorrido se deja sin
-   desplazamiento propio. Así la rueda no encuentra nada que mover dentro del
-   marco y se encadena hacia la página que lo aloja, que es la que debe terminar
-   de encuadrar la sala. La estación en curso se conserva y se restituye, de modo
-   que salir del bloque y volver a él no altere el punto del recorrido. */
+function aplicarBloqueo() {
+  document.documentElement.style.overflow = hojaBloqueada || !iniciado ? "hidden" : "";
+}
+
 function bloquearHoja(activo) {
   if (activo === hojaBloqueada) return;
   if (activo) anclaMarco = window.scrollY;
   hojaBloqueada = activo;
-  document.documentElement.style.overflow = activo ? "hidden" : "";
+  aplicarBloqueo();
   if (Math.abs(window.scrollY - anclaMarco) > 1) window.scrollTo(0, anclaMarco);
 }
 
-/* En una ventana más baja que el bloque la fracción visible nunca alcanza la
-   unidad, de manera que el listón se mide contra el mayor encuadre que la
-   página anfitriona haya llegado a conceder y no contra un valor absoluto. Los
-   dos umbrales, uno para tomar el mando y otro más bajo para soltarlo, evitan
-   que el recorrido oscile cuando el lector se detiene justo en el borde. */
+aplicarBloqueo();
+
 function liston(base) {
   return Math.min(base, Math.max(0.45, techoVisible - (1 - base)));
 }
@@ -791,9 +706,6 @@ const vigia = new IntersectionObserver(
     if (enmarcado === antes) return;
     bloquearHoja(!enmarcado);
     if (!enmarcado) return;
-    /* El bloque acaba de quedar encuadrado. Lo que reste del arrastre que lo
-       trajo hasta aquí se descarta, de modo que el visitante vea la sala
-       completa antes de que el recorrido avance de estación. */
     esperaGesto = true;
     momentoMarco = performance.now();
     window.clearTimeout(silencio);
@@ -829,15 +741,6 @@ window.addEventListener(
 );
 medirAvance();
 
-/* Un gesto equivale a una estación. El trackpad de macOS sigue emitiendo
-   eventos de inercia después de que los dedos se levantan, de manera que contar
-   píxeles encadenaría varios saltos con una sola pasada. Por eso el salto se
-   dispara en cuanto el desplazamiento supera un umbral mínimo y queda bloqueado
-   hasta que la corriente de eventos guarda silencio durante un instante, que es
-   la señal fiable de que el gesto terminó. En el primer y en el último tramo el
-   evento se deja pasar sin cancelar, de modo que dentro de un bloque incrustado
-   en StoryMaps la historia que lo contiene siga desplazándose y el visitante
-   nunca quede atrapado dentro del recorrido. */
 const UMBRAL_GESTO = 6;
 const SILENCIO_GESTO = 190;
 const ENFRIAMIENTO = 460;
@@ -847,21 +750,12 @@ let acumulado = 0;
 let silencio;
 let ultimoSalto = 0;
 
-/* El bloqueo se levanta cuando se cumplen dos condiciones a la vez, que la
-   corriente de eventos haya callado y que haya transcurrido un enfriamiento
-   mínimo desde el salto anterior. La segunda condición protege el recorrido de
-   los tirones que produce el propio dibujado de la maqueta, capaces de abrir un
-   hueco largo entre dos eventos de un mismo gesto y de encadenar así dos saltos
-   donde el visitante solo hizo uno. */
 function liberarGesto() {
   const resto = ENFRIAMIENTO - (performance.now() - ultimoSalto);
   if (resto > 0) {
     silencio = window.setTimeout(liberarGesto, resto);
     return;
   }
-  /* El arrastre que terminó de encuadrar el bloque se agota sin avanzar y el
-     mando solo vuelve al recorrido cuando la corriente calla y ha transcurrido
-     un descanso mínimo frente a la vista general. */
   const asiento = DESCANSO_MARCO - (performance.now() - momentoMarco);
   if (esperaGesto && asiento > 0) {
     silencio = window.setTimeout(liberarGesto, asiento);
@@ -882,9 +776,10 @@ window.addEventListener(
   "wheel",
   (evento) => {
     if (evento.ctrlKey) return;
-    /* Con el visor de piezas abierto el recorrido queda detenido, de modo que
-       la rueda gire la pieza dentro del bloque incrustado sin que la estación
-       cambie por debajo del panel. */
+    if (!iniciado) {
+      evento.preventDefault();
+      return;
+    }
     if (piezasAbiertas) {
       evento.preventDefault();
       return;
@@ -894,8 +789,6 @@ window.addEventListener(
     const sentido = salto > 0 ? 1 : -1;
     if (sentido > 0 && indiceDestino >= orden.length - 1) return;
     if (sentido < 0 && indiceDestino <= 0) return;
-    /* Mientras el bloque asome a medias dentro de la historia, el gesto se
-       devuelve a la página anfitriona para que termine de encuadrar la sala. */
     if (!enmarcado) {
       acumulado = 0;
       return;
@@ -940,6 +833,7 @@ visor.addEventListener("load", () => {
   } finally {
     visor.dismissPoster();
   }
+  if (estadoPortada && !iniciado) estadoPortada.textContent = "Maqueta lista";
 });
 
 visor.addEventListener("error", (evento) => {
@@ -994,6 +888,13 @@ const atras = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
 
 document.addEventListener("keydown", (evento) => {
   if (evento.metaKey || evento.ctrlKey || evento.altKey) return;
+  if (!iniciado) {
+    if (evento.key === "Enter" || adelante.has(evento.key)) {
+      evento.preventDefault();
+      iniciarRecorrido();
+    }
+    return;
+  }
   if (piezasAbiertas) {
     if (evento.key === "Escape") {
       evento.preventDefault();
@@ -1034,10 +935,6 @@ document.addEventListener("keydown", (evento) => {
   }
 });
 
-/* En pantallas táctiles el dedo se apoya casi siempre sobre la maqueta, que
-   captura el gesto para girar la mirada. El deslizamiento vertical se atiende
-   aquí de manera explícita, con un umbral holgado que distingue el arrastre
-   horizontal de la órbita del avance vertical del relato. */
 let tactoY = null;
 let tactoX = null;
 let tactoUsado = false;
@@ -1052,8 +949,6 @@ window.addEventListener(
     tactoY = evento.touches[0].clientY;
     tactoX = evento.touches[0].clientX;
     tactoUsado = false;
-    /* Un dedo que se apoya de nuevo es siempre un gesto deliberado y no el
-       resto del arrastre que trajo el bloque hasta el encuadre. */
     if (performance.now() - momentoMarco > DESCANSO_MARCO) esperaGesto = false;
   },
   { passive: true },
@@ -1062,7 +957,7 @@ window.addEventListener(
 window.addEventListener(
   "touchmove",
   (evento) => {
-    if (piezasAbiertas) return;
+    if (piezasAbiertas || !iniciado) return;
     if (tactoY === null || tactoUsado || evento.touches.length !== 1) return;
     if (esperaGesto || !enmarcado) return;
     const dy = tactoY - evento.touches[0].clientY;
@@ -1085,3 +980,19 @@ window.addEventListener(
   },
   { passive: true },
 );
+
+function iniciarRecorrido() {
+  if (iniciado) return;
+  iniciado = true;
+  document.body.classList.add("iniciado");
+  aplicarBloqueo();
+  window.setTimeout(() => {
+    if (portada) portada.hidden = true;
+  }, 700);
+  try {
+    visor.focus({ preventScroll: true });
+  } catch {}
+}
+
+if (entrar) entrar.addEventListener("click", iniciarRecorrido);
+if (portada) portada.addEventListener("click", iniciarRecorrido);

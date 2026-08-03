@@ -13,16 +13,6 @@
   box-sizing: border-box;
 }
 
-/* El desplazamiento suave lo gobierna el guion, que anima cuadro a cuadro con
-   una duración conocida. Dejarlo también en la hoja de estilo duplicaría la
-   animación de cada traslado programado y produciría el arrastre perezoso que
-   obligaba a repetir el gesto varias veces. Por la misma razón se retiró el
-   anclaje de desplazamiento. El motor de anclaje del navegador retenía la
-   página en la estación de partida durante la primera mitad de cada traslado,
-   desatendía las posiciones que el guion le pedía cuadro a cuadro y devolvía el
-   mando cuando el recorrido ya había consumido medio trayecto, de modo que el
-   avance se detenía entre dos secciones y la ficha legible en pantalla dejaba
-   de corresponder a la vista de la sala. */
 html {
   scroll-behavior: auto;
 }
@@ -39,9 +29,6 @@ button {
   font: inherit;
 }
 
-/* La escena permanece fija mientras el relato se desplaza por encima, de manera
-   que el desplazamiento vertical del trackpad, de la rueda o del dedo avance de
-   una estación a la siguiente sin recurrir a gestos artificiales. */
 .escena {
   position: fixed;
   inset: 0;
@@ -97,26 +84,100 @@ model-viewer {
   }
 }
 
-.cabecera {
-  position: absolute;
-  top: clamp(1.25rem, 4vw, 3.2rem);
-  left: clamp(1.25rem, 5vw, 4.5rem);
-  z-index: 2;
-  max-width: 30rem;
-  pointer-events: none;
+.portada {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.1rem, 5vw, 4rem);
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(44, 38, 27, 0.78), rgba(11, 10, 9, 0.94) 70%);
+  backdrop-filter: blur(7px) saturate(0.85);
+  cursor: pointer;
   transition:
-    opacity 420ms ease,
-    transform 520ms ease;
+    opacity 620ms ease,
+    visibility 620ms ease;
 }
 
-body.en-estacion .cabecera {
+body.iniciado .portada {
   opacity: 0;
-  transform: translateY(-1.5rem);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.portada-marco {
+  max-width: 40rem;
+}
+
+.portada h1 {
+  margin: 0.6rem 0 0;
+}
+
+.portada .subtitulo {
+  margin-top: 0.85rem;
+}
+
+.entrar {
+  margin-top: clamp(1.4rem, 4vh, 2.4rem);
+  padding: 0.9rem 1.9rem;
+  border: 1px solid rgba(199, 169, 107, 0.7);
+  border-radius: 99rem;
+  color: #f4f0e8;
+  background: rgba(76, 61, 36, 0.45);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease,
+    transform 200ms ease;
+  animation: respirar 3.2s ease-in-out infinite;
+}
+
+.entrar:hover,
+.entrar:focus-visible {
+  border-color: var(--oro);
+  background: rgba(112, 90, 50, 0.72);
+  transform: translateY(-1px);
+  animation: none;
+}
+
+.aviso-uso {
+  max-width: 30rem;
+  margin: 1.35rem auto 0;
+  color: rgba(244, 240, 232, 0.68);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.portada-estado {
+  margin: 1.1rem 0 0;
+  color: rgba(199, 169, 107, 0.72);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.progreso,
+.acciones,
+.estaciones {
+  transition: opacity 520ms ease;
+}
+
+body:not(.iniciado) .progreso,
+body:not(.iniciado) .acciones,
+body:not(.iniciado) .estaciones {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .sobrelinea,
-.clase,
-.invitacion {
+.clase {
   margin: 0;
   color: var(--oro);
   font-size: 0.66rem;
@@ -143,12 +204,6 @@ h1 {
   font-style: italic;
 }
 
-.invitacion {
-  margin-top: 1.6rem;
-  color: rgba(244, 240, 232, 0.5);
-  animation: respirar 2.6s ease-in-out infinite;
-}
-
 @keyframes respirar {
   50% {
     opacity: 0.35;
@@ -173,9 +228,6 @@ h1 {
   transition: width 160ms linear;
 }
 
-/* El relato se apila en secciones de una pantalla de alto. No intercepta el
-   puntero salvo en la propia ficha, de modo que el arrastre lateral sobre el
-   resto de la pantalla siga girando la mirada dentro de la estación. */
 .relato {
   position: relative;
   z-index: 3;
@@ -373,7 +425,6 @@ h1 {
   transform: scale(1.2);
 }
 
-/* Llamada a las piezas digitalizadas dentro de la ficha de la vitrina. */
 .abrir-piezas {
   display: inline-flex;
   align-items: center;
@@ -410,10 +461,6 @@ h1 {
   transform: translateY(-1px);
 }
 
-/* Visor de piezas. El panel se levanta sobre la maqueta sin ocultarla del todo,
-   de manera que la pieza digitalizada se lea como una vitrina suspendida dentro
-   de la misma sala. El velo posterior desenfoca la escena lo justo para que el
-   objeto gane figura sin perder el contexto arquitectónico. */
 .piezas {
   position: fixed;
   inset: 0;
@@ -559,9 +606,6 @@ h1 {
     color 180ms ease;
 }
 
-/* La regla de presentación de la flecha pesa más que la del atributo oculto que
-   trae el navegador, así que la pieza solitaria necesita retirarla de manera
-   explícita para que el pie no muestre una navegación sin destino. */
 .piezas-flecha[hidden] {
   display: none;
 }
@@ -596,22 +640,6 @@ h1 {
 .piezas-punto-activo {
   background: var(--oro);
   transform: scale(1.25);
-}
-
-.piezas-enlace {
-  flex: none;
-  padding-bottom: 0.12rem;
-  border-bottom: 1px solid rgba(199, 169, 107, 0.4);
-  color: rgba(244, 240, 232, 0.6);
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-
-.piezas-enlace:hover,
-.piezas-enlace:focus-visible {
-  color: var(--oro);
 }
 
 .piezas-cerrar {
@@ -650,19 +678,17 @@ body.con-piezas .acciones {
   pointer-events: none;
 }
 
-/* El documento deja de desplazarse mientras la vitrina digital está abierta. La
-   posición vertical se conserva, de manera que al cerrar el panel el recorrido
-   reaparezca en la misma estación y ningún arrastre encadenado desde el bloque
-   incrustado arrastre la sala por debajo. */
 html.con-piezas {
   overflow: hidden;
 }
 
-/* Vista acotada. En pantallas estrechas la ficha se ancla al pie, sobre la
-   barra de estaciones, y deja libre la mitad superior para la maqueta. */
 @media (max-width: 860px) {
-  .cabecera {
-    max-width: 18rem;
+  .portada-marco {
+    max-width: 22rem;
+  }
+
+  .aviso-uso {
+    font-size: 0.72rem;
   }
 
   .paso {
@@ -715,9 +741,6 @@ html.con-piezas {
     font-size: 0.55rem;
   }
 
-  /* En el teléfono la pieza ocupa la pantalla completa, con el pie repartido en
-     dos filas para que la navegación entre modelos y el enlace a la ficha
-     original quepan sin comprimir el lienzo tridimensional. */
   .piezas {
     padding: 0;
   }
