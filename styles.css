@@ -111,6 +111,11 @@ body.iniciado .portada {
   max-width: 40rem;
 }
 
+.portada .sobrelinea {
+  line-height: 1.6;
+  letter-spacing: 0.16em;
+}
+
 .portada h1 {
   margin: 0.6rem 0 0;
 }
@@ -685,6 +690,11 @@ html.con-piezas {
 @media (max-width: 860px) {
   .portada-marco {
     max-width: 22rem;
+  }
+
+  .portada .sobrelinea {
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
   }
 
   .aviso-uso {

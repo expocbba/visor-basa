@@ -833,7 +833,7 @@ visor.addEventListener("load", () => {
   } finally {
     visor.dismissPoster();
   }
-  if (estadoPortada && !iniciado) estadoPortada.textContent = "Maqueta lista";
+  if (estadoPortada) estadoPortada.hidden = true;
 });
 
 visor.addEventListener("error", (evento) => {
