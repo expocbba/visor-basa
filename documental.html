@@ -46,20 +46,20 @@
       (function () {
         var v = document.getElementById("pelicula");
         var lista = "./doc.m3u8";
-        if (v.canPlayType("application/vnd.apple.mpegurl")) {
-          v.setAttribute("src", lista);
-        } else {
-          var g = document.createElement("script");
-          g.src = "./hls.min.js";
-          g.addEventListener("load", function () {
-            if (!window.Hls || !window.Hls.isSupported()) { v.setAttribute("src", "./documental-muro.mp4"); return; }
-            var m = new window.Hls({ maxBufferLength: 45 });
-            m.loadSource(lista);
-            m.attachMedia(v);
-          });
-          g.addEventListener("error", function () { v.setAttribute("src", "./documental-muro.mp4"); });
-          document.head.appendChild(g);
+        function nativo() {
+          if (v.canPlayType("application/vnd.apple.mpegurl")) { v.setAttribute("src", lista); return; }
+          v.setAttribute("src", "./documental-muro.mp4");
         }
+        var g = document.createElement("script");
+        g.src = "./hls.min.js";
+        g.addEventListener("load", function () {
+          if (!window.Hls || !window.Hls.isSupported()) { nativo(); return; }
+          var m = new window.Hls({ maxBufferLength: 45 });
+          m.loadSource(lista);
+          m.attachMedia(v);
+        });
+        g.addEventListener("error", nativo);
+        document.head.appendChild(g);
         document.getElementById("completa").addEventListener("click", function () {
           var d = document.documentElement;
           if (document.fullscreenElement) { document.exitFullscreen(); return; }
