@@ -273,25 +273,126 @@ function prepararTelon() {
       const previo = material.pbrMetallicRoughness.baseColorFactor ?? [1, 1, 1, 1];
       material.setAlphaMode("BLEND");
       material.setDoubleSided?.(true);
-      telon.push({ material, base: [previo[0], previo[1], previo[2]] });
+      telon.push({
+        material,
+        base: [previo[0], previo[1], previo[2]],
+        lienzo: material.name === "BASA_Documentary_Screen",
+      });
     } catch (error) {
-      console.warn("No se pudo preparar el telón", material.name, error);
+      /* */
     }
   });
-  if (!telon.length) {
-    console.warn("El modelo no trae el material BASA_Documentary_Screen. Ejecuta parche-telon.mjs.");
+}
+
+window.addEventListener("unhandledrejection", (evento) => {
+  const causa = evento.reason;
+  const clase = causa && causa.name;
+  if (clase === "AbortError" || clase === "NotAllowedError") evento.preventDefault();
+});
+
+const rutasDocumental = ["./documental.mp4", "./documental.webm"];
+let rutaDocumental = "";
+let cinta = null;
+let telonVivo = false;
+let cineAbierto = false;
+
+function girarCinta(encendido) {
+  if (!cinta) return;
+  if (encendido && !cineAbierto) {
+    const intento = cinta.play();
+    if (intento && intento.catch) intento.catch(() => {});
+  } else {
+    cinta.pause();
   }
+}
+
+function enderezar(textura) {
+  const muestra = textura?.sampler;
+  if (!muestra) return;
+  try {
+    muestra.setWrapS(10497);
+    muestra.setWrapT(10497);
+  } catch (error) {
+    /* */
+  }
+  try {
+    muestra.setScale({ u: 1, v: -1 });
+    muestra.setOffset({ u: 0, v: 1 });
+  } catch (error) {
+    try {
+      muestra.setScale([1, -1]);
+      muestra.setOffset([0, 1]);
+    } catch (otro) {
+      /* */
+    }
+  }
+}
+
+async function encenderTelon() {
+  if (telonVivo || !telon.length) return;
+  for (const ruta of rutasDocumental) {
+    try {
+      const sonda = await fetch(ruta, { method: "HEAD" });
+      if (sonda.ok) {
+        rutaDocumental = ruta;
+        break;
+      }
+    } catch (error) {
+      /* */
+    }
+  }
+  if (!rutaDocumental) return;
+  let textura = null;
+  try {
+    textura = await visor.createVideoTexture(rutaDocumental);
+  } catch (error) {
+    return;
+  }
+  if (!textura) return;
+  cinta = textura.source?.element ?? null;
+  if (cinta) {
+    cinta.loop = true;
+    cinta.muted = true;
+    cinta.playsInline = true;
+    cinta.setAttribute("playsinline", "");
+    const acomodar = () => girarCinta(actual === "documental");
+    if (!cinta.paused && cinta.readyState >= 3) acomodar();
+    else cinta.addEventListener("playing", acomodar, { once: true });
+    const arranque = cinta.play();
+    if (arranque && arranque.catch) arranque.catch(() => {});
+  }
+  telon.forEach(({ material, lienzo }) => {
+    if (!lienzo) return;
+    try {
+      material.pbrMetallicRoughness.baseColorTexture.setTexture(textura);
+      enderezar(material.pbrMetallicRoughness.baseColorTexture.texture);
+    } catch (error) {
+      /* */
+    }
+    try {
+      material.setEmissiveFactor([1, 1, 1]);
+      material.emissiveTexture.setTexture(textura);
+      enderezar(material.emissiveTexture.texture);
+    } catch (error) {
+      /* */
+    }
+  });
+  telonVivo = true;
+  document.body.classList.add("con-documental");
+  velarTelon(actual);
 }
 
 function velarTelon(nombre) {
   const alfa = nombre === "documental" ? 1 : 0;
-  telon.forEach(({ material, base }) => {
+  telon.forEach(({ material, base, lienzo }) => {
+    const tinte = telonVivo && lienzo ? [0.14, 0.14, 0.14] : base;
     try {
-      material.pbrMetallicRoughness.setBaseColorFactor([base[0], base[1], base[2], alfa]);
+      material.pbrMetallicRoughness.setBaseColorFactor([tinte[0], tinte[1], tinte[2], alfa]);
     } catch (error) {
-      console.warn("No se pudo velar el telón", error);
+      /* */
     }
   });
+  girarCinta(alfa === 1);
 }
 
 function limitar(nombre, estacion, distancia, campo, giro) {
@@ -387,6 +488,15 @@ function construirRelato() {
       llamada.textContent = grupo.rotulo;
       llamada.addEventListener("click", () => abrirPiezas(nombre, llamada));
       bloque.append(llamada);
+    }
+
+    if (nombre === "documental") {
+      const cine = document.createElement("button");
+      cine.type = "button";
+      cine.className = "abrir-piezas abrir-cine";
+      cine.textContent = "Ver el documental completo";
+      cine.addEventListener("click", () => abrirCine(cine));
+      bloque.append(cine);
     }
 
     ficha.append(cifra, bloque);
@@ -635,6 +745,113 @@ window.addEventListener(
   { passive: true },
 );
 
+const sala = document.createElement("div");
+sala.className = "cine";
+sala.hidden = true;
+sala.setAttribute("role", "dialog");
+sala.setAttribute("aria-modal", "true");
+sala.setAttribute("aria-label", "Equilibrio entre el centro y lo local");
+sala.innerHTML = `
+  <div class="cine-velo" data-cerrar></div>
+  <div class="cine-marco">
+    <button class="cine-cerrar" type="button" aria-label="Cerrar el documental">&times;</button>
+    <header class="cine-cabecera">
+      <p class="clase">Documental</p>
+      <h3 class="cine-nombre">Equilibrio entre el centro y lo local. Estrategias de movilización y producción del estado Inka colonial temprano en Cochabamba, Bolivia.</h3>
+    </header>
+    <div class="cine-lienzo">
+      <video class="cine-video" controls playsinline preload="metadata"></video>
+    </div>
+    <footer class="cine-pie">
+      <button class="cine-completa" type="button">Pantalla completa</button>
+    </footer>
+  </div>
+`;
+document.body.append(sala);
+
+const lienzoCine = sala.querySelector(".cine-lienzo");
+const videoCine = sala.querySelector(".cine-video");
+let llamadaCine = null;
+let anclaCine = 0;
+
+function abrirCine(origen) {
+  if (cineAbierto) return;
+  cineAbierto = true;
+  llamadaCine = origen ?? null;
+  anclaCine = window.scrollY;
+  const punto = cinta && Number.isFinite(cinta.currentTime) ? cinta.currentTime : 0;
+  girarCinta(false);
+  if (!videoCine.getAttribute("src")) videoCine.setAttribute("src", rutaDocumental);
+  sala.hidden = false;
+  document.documentElement.classList.add("con-piezas");
+  document.body.classList.add("con-piezas");
+  window.requestAnimationFrame(() => sala.classList.add("cine-visible"));
+  const arrancar = () => {
+    try {
+      videoCine.currentTime = punto;
+    } catch (error) {
+      /* */
+    }
+    const intento = videoCine.play();
+    if (intento && intento.catch) intento.catch(() => {});
+  };
+  if (videoCine.readyState >= 1) arrancar();
+  else videoCine.addEventListener("loadedmetadata", arrancar, { once: true });
+  sala.querySelector(".cine-cerrar").focus({ preventScroll: true });
+}
+
+function cerrarCine() {
+  if (!cineAbierto) return;
+  cineAbierto = false;
+  const punto = videoCine.currentTime;
+  videoCine.pause();
+  if (document.fullscreenElement) document.exitFullscreen?.();
+  sala.classList.remove("cine-visible");
+  document.documentElement.classList.remove("con-piezas");
+  document.body.classList.remove("con-piezas");
+  window.scrollTo(0, anclaCine);
+  window.setTimeout(() => {
+    if (!cineAbierto) sala.hidden = true;
+  }, 260);
+  if (cinta && Number.isFinite(punto)) {
+    try {
+      cinta.currentTime = punto;
+    } catch (error) {
+      /* */
+    }
+  }
+  girarCinta(actual === "documental");
+  if (llamadaCine) llamadaCine.focus({ preventScroll: true });
+  llamadaCine = null;
+}
+
+sala.querySelector(".cine-cerrar").addEventListener("click", cerrarCine);
+sala.querySelector("[data-cerrar]").addEventListener("click", cerrarCine);
+sala.querySelector(".cine-completa").addEventListener("click", () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen?.();
+    return;
+  }
+  if (lienzoCine.requestFullscreen) lienzoCine.requestFullscreen();
+  else if (videoCine.webkitEnterFullscreen) videoCine.webkitEnterFullscreen();
+});
+sala.addEventListener("wheel", (evento) => evento.preventDefault(), { passive: false });
+
+window.addEventListener("keydown", (evento) => {
+  if (evento.key !== "Escape") return;
+  if (cineAbierto && !document.fullscreenElement) cerrarCine();
+});
+
+window.addEventListener(
+  "scroll",
+  () => {
+    if (!cineAbierto) return;
+    if (Math.abs(window.scrollY - anclaCine) < 1) return;
+    window.scrollTo(0, anclaCine);
+  },
+  { passive: true },
+);
+
 const secciones = [...document.querySelectorAll(".paso")];
 
 function resolverEstacion() {
@@ -826,24 +1043,24 @@ visor.addEventListener("load", () => {
   cargado = true;
   try {
     prepararTelon();
+    encenderTelon();
     crearPuntos();
     enfocar(actual);
   } catch (error) {
-    console.warn("Encuadre inicial no disponible", error);
+    /* */
   } finally {
     visor.dismissPoster();
   }
   if (estadoPortada) estadoPortada.hidden = true;
 });
 
-visor.addEventListener("error", (evento) => {
-  console.error("Fallo al cargar el modelo", evento.detail ?? evento);
-  anunciar("No se pudo cargar modelo.glb. Verifica que el archivo esté junto a index.html.");
+visor.addEventListener("error", () => {
+  anunciar("No se pudo cargar el recorrido.");
 });
 
 window.setTimeout(() => {
   if (!cargado) {
-    anunciar("La carga tarda más de lo previsto. Revisa la conexión o la ruta de modelo.glb.");
+    anunciar("La carga tarda más de lo previsto.");
   }
 }, 30000);
 

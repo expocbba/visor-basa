@@ -174,24 +174,26 @@ header p.baja{font-family:var(--serif);font-style:italic;color:var(--tenue);
 .lupa{position:fixed;inset:0;z-index:80;background:rgba(5,5,7,.965);
   display:none;align-items:center;justify-content:center;overflow:hidden}
 .lupa.on{display:flex}
-.lupa .lienzo{position:relative;width:100%;height:100%;display:grid;place-items:center;
-  cursor:grab;touch-action:none}
-.lupa .lienzo.arr{cursor:grabbing}
+.lupa .lienzo{position:relative;z-index:1;width:100%;height:100%;display:grid;place-items:center;
+  cursor:zoom-out;touch-action:none}
+.lupa .lienzo img{cursor:grab}
+.lupa .lienzo.arr,.lupa .lienzo.arr img{cursor:grabbing}
 .lupa img{max-width:88vw;max-height:88svh;width:auto;height:auto;
   transform-origin:center center;transition:transform .12s linear;
   filter:drop-shadow(0 30px 60px rgba(0,0,0,.8));user-select:none;-webkit-user-drag:none}
-.lupa .barra{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+.lupa .barra{position:absolute;z-index:3;bottom:22px;left:50%;transform:translateX(-50%);
   display:flex;gap:8px;align-items:center;background:rgba(12,11,14,.86);
   border:1px solid rgba(203,164,42,.28);padding:8px 12px}
 .lupa .barra button{width:36px;height:36px;border:1px solid rgba(203,164,42,.28);
   color:var(--ocre);display:grid;place-items:center;transition:all .35s ease}
 .lupa .barra button:hover{background:rgba(203,164,42,.14)}
 .lupa .barra .zx{font-size:11px;color:#8a8378;letter-spacing:.14em;min-width:52px;text-align:center}
-.lupa .tit{position:absolute;top:22px;left:50%;transform:translateX(-50%);
+.lupa .tit{position:absolute;z-index:3;top:22px;left:50%;transform:translateX(-50%);
   font-family:var(--serif);font-style:italic;color:#cfc6b4;font-size:clamp(14px,1.7vw,22px);
-  text-align:center;max-width:80vw}
-.lupa .x{position:absolute;top:18px;right:20px;width:40px;height:40px;
+  text-align:center;max-width:min(80vw,calc(100vw - 190px));pointer-events:none}
+.lupa .x{position:absolute;z-index:4;top:18px;right:20px;width:40px;height:40px;
   border:1px solid rgba(203,164,42,.36);border-radius:50%;color:var(--ocre);
+  background:rgba(12,11,14,.86);cursor:pointer;
   display:grid;place-items:center;font-size:16px;transition:all .35s ease}
 .lupa .x:hover{background:rgba(203,164,42,.16)}
 
@@ -411,7 +413,7 @@ function lupaAbrir(src,tit){
 }
 function lupaCerrar(){lupa.classList.remove("on"); document.body.classList.remove("bloq");}
 document.getElementById("l-x").addEventListener("click",lupaCerrar);
-lupa.addEventListener("click",function(e){if(e.target===lupa)lupaCerrar();});
+lupa.addEventListener("click",function(e){if(e.target===lupa||e.target===lienzo)lupaCerrar();});
 document.getElementById("l-mas").addEventListener("click",function(){z=Math.min(6,z*1.35);pinta();});
 document.getElementById("l-menos").addEventListener("click",function(){z=Math.max(1,z/1.35);if(z===1){px=0;py=0;}pinta();});
 document.getElementById("l-reset").addEventListener("click",function(){z=1;px=0;py=0;pinta();});
@@ -422,6 +424,7 @@ lienzo.addEventListener("wheel",function(e){
   pinta();
 },{passive:false});
 lienzo.addEventListener("pointerdown",function(e){
+  if(e.target!==lImg&&z<=1)return;
   arr=true; ax=e.clientX-px; ay=e.clientY-py; lienzo.classList.add("arr");
   lienzo.setPointerCapture(e.pointerId);
 });
