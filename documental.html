@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Equilibrio entre el centro y lo local · Museo BASA</title>
+    <style>
+      :root { color-scheme: dark; --oro: #c7a96b; --linea: rgba(244, 240, 232, 0.16); }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: #100f0d;
+        color: #f4f0e8;
+        font-family: "Helvetica Neue", Helvetica, Arial, system-ui, -apple-system, sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+      header { padding: 20px 24px 14px; border-bottom: 1px solid var(--linea); }
+      .clase { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--oro); }
+      h1 { margin: 0; font-size: 17px; font-weight: 500; line-height: 1.45; max-width: 74ch; }
+      .lienzo { flex: 1; min-height: 0; display: grid; place-items: center; background: #000; }
+      video { width: 100%; height: 100%; max-height: 100%; object-fit: contain; background: #000; display: block; }
+      footer { padding: 12px 24px 18px; display: flex; justify-content: space-between; align-items: center; gap: 16px; border-top: 1px solid var(--linea); }
+      .pie { margin: 0; font-size: 12px; color: rgba(244, 240, 232, 0.6); }
+      button {
+        appearance: none; cursor: pointer; font: inherit; font-size: 12px;
+        letter-spacing: 0.14em; text-transform: uppercase; color: var(--oro);
+        background: transparent; border: 1px solid var(--oro); border-radius: 999px; padding: 9px 20px;
+      }
+      button:hover { background: rgba(199, 169, 107, 0.14); }
+      @media (max-width: 640px) { h1 { font-size: 15px; } header { padding: 16px 16px 12px; } footer { padding: 10px 16px 14px; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p class="clase">Documental</p>
+      <h1>Equilibrio entre el centro y lo local. Estrategias de movilización y producción del estado Inka colonial temprano en Cochabamba, Bolivia.</h1>
+    </header>
+    <div class="lienzo"><video id="pelicula" controls playsinline preload="metadata"></video></div>
+    <footer>
+      <p class="pie">Museo BASA, Colección de las Américas de Bonn</p>
+      <button id="completa" type="button">Pantalla completa</button>
+    </footer>
+    <script>
+      (function () {
+        var v = document.getElementById("pelicula");
+        var lista = "./doc.m3u8";
+        if (v.canPlayType("application/vnd.apple.mpegurl")) {
+          v.setAttribute("src", lista);
+        } else {
+          var g = document.createElement("script");
+          g.src = "./hls.min.js";
+          g.addEventListener("load", function () {
+            if (!window.Hls || !window.Hls.isSupported()) { v.setAttribute("src", "./documental-muro.mp4"); return; }
+            var m = new window.Hls({ maxBufferLength: 45 });
+            m.loadSource(lista);
+            m.attachMedia(v);
+          });
+          g.addEventListener("error", function () { v.setAttribute("src", "./documental-muro.mp4"); });
+          document.head.appendChild(g);
+        }
+        document.getElementById("completa").addEventListener("click", function () {
+          var d = document.documentElement;
+          if (document.fullscreenElement) { document.exitFullscreen(); return; }
+          if (v.webkitEnterFullscreen) { v.webkitEnterFullscreen(); return; }
+          (d.requestFullscreen || d.webkitRequestFullscreen).call(d);
+        });
+      })();
+    </script>
+  </body>
+</html>
