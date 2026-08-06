@@ -32,3 +32,7 @@ jobs:
       - name: Desplegar en Pages
         id: despliegue
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 3000000
+          error_count: 30
+          reporting_interval: 15000
