@@ -136,21 +136,22 @@ header p.baja{font-family:var(--serif);font-style:italic;color:var(--tenue);
 .proceso p.ent{font-size:clamp(13px,1.35vw,17px);line-height:1.78;color:#a7a094;
   max-width:74ch;font-weight:300;margin:0 0 clamp(28px,3.4vw,48px)}
 .tira{position:relative}
-.carro{display:flex;gap:clamp(14px,2vw,32px);overflow-x:auto;scroll-snap-type:x mandatory;
-  padding:12px clamp(20px,4vw,70px) 26px;scrollbar-width:none}
+.carro{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:0;
+  scrollbar-width:none;outline:0}
 .carro::-webkit-scrollbar{display:none}
-.naipe{position:relative;flex:0 0 auto;scroll-snap-align:center;cursor:zoom-in;
-  width:clamp(212px,25vw,330px);border:1px solid rgba(203,164,42,.20);
-  background:#0c0b0e;transition:transform .55s cubic-bezier(.22,.9,.24,1),border-color .5s ease,box-shadow .55s ease}
-.naipe img{width:100%;height:auto;opacity:.94;transition:opacity .5s ease}
-.naipe:hover{transform:translateY(-12px);border-color:rgba(203,164,42,.62);
-  box-shadow:0 26px 46px rgba(0,0,0,.66)}
-.naipe:hover img{opacity:1}
-.naipe .paso{position:absolute;top:12px;left:12px;font-size:10px;letter-spacing:.2em;
-  color:var(--ocre);background:rgba(9,9,11,.72);border:1px solid rgba(203,164,42,.4);
-  padding:5px 9px}
-.flechas{display:flex;gap:10px;justify-content:flex-end;padding:0 clamp(20px,4vw,70px);
-  max-width:1500px;margin:0 auto}
+.naipe{position:relative;margin:0;flex:0 0 100%;scroll-snap-align:center;
+  scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;
+  padding:0 clamp(20px,4vw,70px)}
+.naipe img{width:auto;height:auto;max-width:100%;max-height:min(1000px,84svh);
+  border:1px solid rgba(203,164,42,.22);background:#0c0b0e;
+  box-shadow:0 30px 56px rgba(0,0,0,.62)}
+.naipe .paso{margin-top:18px;font-size:10px;letter-spacing:.2em;color:var(--ocre)}
+.naipe .lem{font-family:var(--serif);font-size:clamp(13px,1.4vw,19px);color:#cfc6b4;
+  margin-top:7px;text-align:center;max-width:70ch;padding:0 12px;line-height:1.45}
+.flechas{display:flex;gap:12px;justify-content:center;align-items:center;
+  padding:clamp(20px,2.4vw,34px) clamp(20px,4vw,70px) 0;max-width:1500px;margin:0 auto}
+.flechas .cuenta{font-size:11px;color:#8a8378;letter-spacing:.2em;min-width:78px;
+  text-align:center}
 .flechas button{width:44px;height:44px;border:1px solid rgba(203,164,42,.32);color:var(--ocre);
   display:grid;place-items:center;transition:all .4s ease}
 .flechas button:hover{background:rgba(203,164,42,.14)}
@@ -275,13 +276,14 @@ header p.baja{font-family:var(--serif);font-style:italic;color:var(--tenue);
     <div class="esp sello">Panel de sala</div>
     <h2>El proceso de elaboración de la chicha</h2>
     <div class="esp rojo">Del grano de maíz a la bebida</div>
-    <p class="ent">Seis láminas componen la cadena operativa registrada en la Chichería Tradición Punateña, desde la elección del grano hasta el momento en que la bebida se cuela y se sirve, de manera que el visitante puede seguir el itinerario completo por el que un cereal almacenado se convierte en el líquido que sostiene el brindis ceremonial. Cada lámina se amplía con un clic para leer las anotaciones bilingües y el código de tiempo de procedencia.</p>
+    <p class="ent">Seis láminas componen la cadena operativa registrada en la Chichería Tradición Punateña, desde la elección del grano hasta el momento en que la bebida se cuela y se sirve, de manera que el visitante puede seguir el itinerario completo por el que un cereal almacenado se convierte en el líquido que sostiene el brindis ceremonial. Las láminas se presentan ya a tamaño completo y se recorren con las flechas o deslizando de lado, de manera que las anotaciones bilingües y el código de tiempo de procedencia quedan legibles sin necesidad de ampliarlas.</p>
   </div>
   <div class="tira">
     <div class="carro" id="carro"></div>
   </div>
   <div class="flechas">
     <button id="izq" aria-label="Lámina anterior">&#8592;</button>
+    <div class="esp cuenta" id="cuenta" aria-live="polite"></div>
     <button id="der" aria-label="Lámina siguiente">&#8594;</button>
   </div>
 </section>
@@ -304,7 +306,7 @@ header p.baja{font-family:var(--serif);font-style:italic;color:var(--tenue);
     </div>
   </div>
   <div class="pie">
-    Los fragmentos entre corchetes restituyen el texto que la barra de luz de la vitrina oculta en la fotografía del panel. Transcripción literal de los paneles de sala del Museo BASA (Colección de las Américas de Bonn). Fotografías de las piezas y de la vitrina, Eduardo Diego Llanos Palacios, Bonn, 2025. Cosecha de trigo y maíz, Cochabamba, 2008, archivo del proyecto. Registro audiovisual de la cadena operativa, Fundación Tortilla, Chicha tradicional de Cochabamba, Chichería Tradición Punateña, Bolivia, disponible en https://www.youtube.com/watch?v=g8Ntpca_K74. Guion y textos, Llanos Palacios, E. D. (2025) &#8216;Del maíz a la chicha. Cadena operativa y su relevancia ritual&#8217;, curso Fuentes primarias de América del Sur, Prof. Dr. Karoline Noack, Rheinische Friedrich-Wilhelms-Universität Bonn, semestre de invierno 2025/26.
+    Los fragmentos entre corchetes restituyen el texto que la barra de luz de la vitrina oculta en la fotografía del panel. Transcripción literal de los paneles de sala del Museo BASA (Colección de las Américas de Bonn). Fotografías de las piezas y de la vitrina, Eduardo Diego Llanos Palacios, Bonn, 2025. Cosecha de trigo y maíz, Cochabamba, 2008, fotografía con derechos Creative Commons. Registro audiovisual de la cadena operativa, Fundación Tortilla, Chicha tradicional de Cochabamba, Chichería Tradición Punateña, Bolivia, disponible en https://www.youtube.com/watch?v=g8Ntpca_K74. Guion y textos, Llanos Palacios, E. D. (2025) &#8216;Del maíz a la chicha. Cadena operativa y su relevancia ritual&#8217;, curso Fuentes primarias de América del Sur, Prof. Dr. Karoline Noack, Rheinische Friedrich-Wilhelms-Universität Bonn, semestre de invierno 2025/26.
   </div>
 </section>
 
@@ -344,7 +346,7 @@ var OBJ=[
   tit:"Trigo y maíz tras la cosecha",
   proc:"Cochabamba, 2008",
   des:"Grano almacenado en vasija de barro y canasta de fibra vegetal en una vivienda del valle, imagen que documenta la continuidad de las técnicas domésticas de conservación y permite leer las piezas arqueológicas de esta mesa dentro de una práctica todavía viva, donde la elección de la variedad, el secado y el resguardo del grano siguen decidiendo la calidad del wiñapu con el que más tarde se elaborará la chicha.",
-  cred:"Fotografía del archivo del proyecto, Cochabamba, 2008."}
+  cred:"Fotografía con derechos Creative Commons, Cochabamba, 2008."}
 ];
 
 var TIT=["Selección del maíz","Remojo y brotado","Secado y molienda","Cocción del mosto","Fermentación","Reposo, colado y servir"];
@@ -363,12 +365,14 @@ OBJ.forEach(function(o,i){
 });
 
 var carro=document.getElementById("carro");
+carro.tabIndex=0;
+carro.setAttribute("aria-label","Láminas del proceso de elaboración de la chicha");
 PASOS.forEach(function(src,i){
-  var d=document.createElement("div");
-  d.className="naipe"; d.tabIndex=0;
-  d.innerHTML='<span class="esp paso">Paso 0'+(i+1)+'</span><img src="'+src+'" alt="'+TIT[i]+'">';
-  d.addEventListener("click",function(){lupaAbrir(src,TIT[i]+". Chichería Tradición Punateña, registro de la Fundación Tortilla.");});
-  d.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();lupaAbrir(src,TIT[i]);}});
+  var d=document.createElement("figure");
+  d.className="naipe";
+  d.innerHTML='<img src="'+src+'" alt="'+TIT[i]+'" decoding="sync">'
+    +'<figcaption class="esp paso">Paso 0'+(i+1)+'</figcaption>'
+    +'<div class="lem">'+TIT[i]+'. Chichería Tradición Punateña, registro de la Fundación Tortilla.</div>';
   carro.appendChild(d);
 });
 
@@ -442,13 +446,34 @@ document.addEventListener("keydown",function(e){
     if(e.key==="ArrowLeft")abrir((act-1+OBJ.length)%OBJ.length);
   }
 });
-function paso(dir){
+var lam=0, cuenta=document.getElementById("cuenta");
+function rotula(){ cuenta.textContent=(lam+1)+" de "+PASOS.length; }
+function mide(){
   var n=carro.querySelector(".naipe");
-  var d=n?(n.getBoundingClientRect().width+24):260;
-  carro.scrollBy({left:dir*d,behavior:"smooth"});
+  return n?n.getBoundingClientRect().width:carro.clientWidth;
+}
+function paso(dir){
+  lam=Math.max(0,Math.min(PASOS.length-1,lam+dir));
+  carro.scrollTo({left:lam*mide(),behavior:"smooth"});
+  rotula();
 }
 document.getElementById("izq").addEventListener("click",function(){paso(-1);});
 document.getElementById("der").addEventListener("click",function(){paso(1);});
+carro.addEventListener("keydown",function(e){
+  if(e.key==="ArrowRight"){e.preventDefault();paso(1);}
+  if(e.key==="ArrowLeft"){e.preventDefault();paso(-1);}
+});
+var vig=null;
+carro.addEventListener("scroll",function(){
+  clearTimeout(vig);
+  vig=setTimeout(function(){
+    var w=mide(); if(!w)return;
+    lam=Math.max(0,Math.min(PASOS.length-1,Math.round(carro.scrollLeft/w)));
+    rotula();
+  },110);
+});
+addEventListener("resize",function(){carro.scrollLeft=lam*mide();});
+rotula();
 
 var t0=null;
 function late(ts){
