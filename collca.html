@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Collca · Qollqas de Cotapachi · Museo BASA (Colección de las Américas de Bonn)</title>
+<title>Colcas · Qollqas de Cotapachi · Museo BASA (Colección de las Américas de Bonn)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -372,16 +372,8 @@ body.ready .fade{opacity:0}
   </div>
   </div>
 
-  <div class="tag" id="tg1">Mapa LiDAR &middot; el terreno de la pampa sin su cubierta vegetal</div>
-
-  <div class="leg" id="lg1">
-    <b>Mapa LiDAR de la pampa de Cotapachi</b>
-    <p>Lo que se ve al fondo es el terreno mismo, medido desde el aire y despojado de su cubierta vegetal. La luz rasante recorre la loma y hace aparecer las hileras de puntos menudos donde perduran los cimientos circulares de las qollqas.</p>
-    <div class="src">Mapa LiDAR con filas de qollqas. Panel Qollqas de Cotapachi, Gabelmann, O. y Michczy&#324;ski, A., Abteilung f&uuml;r Altamerikanistik, Universit&auml;t Bonn.</div>
-  </div>
-
   <header class="hd">
-    <div class="t">COLLCA</div>
+    <div class="t">COLCAS</div>
     <div class="s">Qollqas de Cotapachi · el relieve y el dibujo</div>
   </header>
 
@@ -561,50 +553,45 @@ function clearAll(){
   cls('#p2','on',false); cls('#p3','on',false);
   cls('#sk','on',false); cls('#pl','on',false);
   cls('#ld','on',false); cls('#ldp','on',false);
-  cls('#lg1','on',false); cls('#tg1','on',false);
 }
 
 var CUES=[
  {t:0.0,  f:function(){ body.dataset.act='1'; clearAll(); fitState='wide'; refit(); isoTo(0);
                         camTo(0.50,0.60,1.00,0.50,0.50); lightTo(0.50,0.60,0.42); lampTo(50,40); }},
- {t:0.7,  f:function(){ cls('#lg1','on',true); }},
- {t:1.5,  f:function(){ cls('#tg1','on',true); }},
- {t:4.6,  f:function(){ lightTo(0.34,0.60,0.34); }},
- {t:5.9,  f:function(){ cls('#lg1','on',false); }},
- {t:6.5,  f:function(){ camTo(0.32,0.60,1.42,0.62,0.50); lightTo(0.32,0.60,0.26); }},
- {t:8.9,  f:function(){ cls('#a1','on',true); }},
- {t:9.8,  f:function(){ cls('#c1','on',true); }},
- {t:17.4, f:function(){ cls('#c1','on',false); cls('#a1','on',false); }},
- {t:18.4, f:function(){ camTo(0.46,0.60,1.16,0.50,0.50); lightTo(0.46,0.60,0.28); cls('#tg1','on',false); }},
- {t:19.6, f:function(){ cls('#ld','on',true); }},
- {t:21.4, f:function(){ cls('#ldp','on',true); }},
- {t:35.8, f:function(){ cls('#ldp','on',false); }},
- {t:37.6, f:function(){ cls('#ld','on',false); }},
+ {t:0.5,  f:function(){ camTo(0.32,0.60,1.42,0.62,0.50); lightTo(0.32,0.60,0.26); }},
+ {t:2.9,  f:function(){ cls('#a1','on',true); }},
+ {t:3.8,  f:function(){ cls('#c1','on',true); }},
+ {t:11.4, f:function(){ cls('#c1','on',false); cls('#a1','on',false); }},
+ {t:12.4, f:function(){ camTo(0.46,0.60,1.16,0.50,0.50); lightTo(0.46,0.60,0.28); }},
+ {t:13.6, f:function(){ cls('#ld','on',true); }},
+ {t:15.4, f:function(){ cls('#ldp','on',true); }},
+ {t:29.8, f:function(){ cls('#ldp','on',false); }},
+ {t:31.6, f:function(){ cls('#ld','on',false); }},
 
- {t:39.6, f:function(){ body.dataset.act='2'; fitState='wide'; refit(); isoTo(0);
+ {t:33.6, f:function(){ body.dataset.act='2'; fitState='wide'; refit(); isoTo(0);
                         camTo(0.50,0.58,1.45,0.50,0.50); lightTo(0.50,0.58,0.34); lampTo(28,16); }},
- {t:42.1, f:function(){ lampTo(74,44); }},
- {t:45.1, f:function(){ lampTo(30,78); draw('#echo',true); }},
- {t:47.6, f:function(){ fitState='bay'; refit(); isoTo(1); lampTo(22,82); }},
- {t:51.6, f:function(){ draw('#tArch',true); cls('#lb1','on',true); }},
- {t:52.7, f:function(){ cls('#p2','on',true); }},
- {t:53.9, f:function(){ draw('#tEave',true); cls('#lb2','on',true); }},
- {t:55.7, f:function(){ draw('#tJamb',true); cls('#lb4','on',true); }},
- {t:57.5, f:function(){ draw('#tDoor',true); cls('#lb3','on',true); }},
+ {t:36.1, f:function(){ lampTo(74,44); }},
+ {t:39.1, f:function(){ lampTo(30,78); draw('#echo',true); }},
+ {t:41.6, f:function(){ fitState='bay'; refit(); isoTo(1); lampTo(22,82); }},
+ {t:45.6, f:function(){ draw('#tArch',true); cls('#lb1','on',true); }},
+ {t:46.7, f:function(){ cls('#p2','on',true); }},
+ {t:47.9, f:function(){ draw('#tEave',true); cls('#lb2','on',true); }},
+ {t:49.7, f:function(){ draw('#tJamb',true); cls('#lb4','on',true); }},
+ {t:51.5, f:function(){ draw('#tDoor',true); cls('#lb3','on',true); }},
 
- {t:67.5, f:function(){ cls('#p2','on',false); ['#lb1','#lb2','#lb3','#lb4'].forEach(function(s){cls(s,'on',false)}); }},
- {t:69.5, f:function(){ body.dataset.act='3'; fitState='left'; refit(); isoTo(1);
+ {t:61.5, f:function(){ cls('#p2','on',false); ['#lb1','#lb2','#lb3','#lb4'].forEach(function(s){cls(s,'on',false)}); }},
+ {t:63.5, f:function(){ body.dataset.act='3'; fitState='left'; refit(); isoTo(1);
                         camTo(0.44,0.62,1.55,0.50,0.50); lightTo(0.44,0.64,0.30); lampTo(20,80); }},
- {t:71.5, f:function(){ cls('#sk','on',true); }},
- {t:74.5, f:function(){ cls('#p3','on',true); }},
- {t:76.5, f:function(){ cls('#pl','on',true); }},
- {t:88.6, f:function(){ cls('#p3','on',false); cls('#pl','on',false); }},
- {t:90.6, f:function(){ cls('#sk','on',false); }},
- {t:93.1, f:function(){ clock=0; idx=0; }}
+ {t:65.5, f:function(){ cls('#sk','on',true); }},
+ {t:68.5, f:function(){ cls('#p3','on',true); }},
+ {t:70.5, f:function(){ cls('#pl','on',true); }},
+ {t:82.6, f:function(){ cls('#p3','on',false); cls('#pl','on',false); }},
+ {t:84.6, f:function(){ cls('#sk','on',false); }},
+ {t:87.1, f:function(){ clock=0; idx=0; }}
 ];
 CUES.sort(function(a,b){return a.t-b.t;});
-var DUR=93.1, ACT_T=[0,39.6,69.5];
-var LD_T0=19.6, LD_PER=20.0, ldDisc=document.getElementById("ldDisc");
+var DUR=87.1, ACT_T=[0,33.6,63.5];
+var LD_T0=13.6, LD_PER=20.0, ldDisc=document.getElementById("ldDisc");
 var ldQuieto=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
 
 var clock=0, idx=0, paused=false, last=null;
