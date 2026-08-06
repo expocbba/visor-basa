@@ -136,22 +136,15 @@ header p.baja{font-family:var(--serif);font-style:italic;color:var(--tenue);
 .proceso p.ent{font-size:clamp(13px,1.35vw,17px);line-height:1.78;color:#a7a094;
   max-width:74ch;font-weight:300;margin:0 0 clamp(28px,3.4vw,48px)}
 .tira{position:relative}
-.carro{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:0;
-  scrollbar-width:none;outline:0}
-.carro::-webkit-scrollbar{display:none}
-.naipe{position:relative;margin:0;flex:0 0 100%;scroll-snap-align:center;
-  scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;
-  padding:0 clamp(20px,4vw,70px)}
-.naipe img{width:auto;height:auto;max-width:100%;max-height:min(1000px,84svh);
+.carro{display:flex;flex-direction:column;align-items:center;
+  gap:clamp(38px,5vw,72px);padding:0 clamp(16px,3vw,50px)}
+.naipe{position:relative;margin:0;width:100%;display:flex;flex-direction:column;align-items:center}
+.naipe img{width:min(100%,780px);height:auto;
   border:1px solid rgba(203,164,42,.22);background:#0c0b0e;
   box-shadow:0 30px 56px rgba(0,0,0,.62)}
-.naipe .paso{margin-top:18px;font-size:10px;letter-spacing:.2em;color:var(--ocre)}
-.naipe .lem{font-family:var(--serif);font-size:clamp(13px,1.4vw,19px);color:#cfc6b4;
-  margin-top:7px;text-align:center;max-width:70ch;padding:0 12px;line-height:1.45}
-.flechas{display:flex;gap:12px;justify-content:center;align-items:center;
-  padding:clamp(20px,2.4vw,34px) clamp(20px,4vw,70px) 0;max-width:1500px;margin:0 auto}
-.flechas .cuenta{font-size:11px;color:#8a8378;letter-spacing:.2em;min-width:78px;
-  text-align:center}
+.naipe .paso{margin-top:18px;font-size:11px;letter-spacing:.2em;color:var(--ocre)}
+.naipe .lem{font-family:var(--serif);font-size:clamp(14px,1.5vw,20px);color:#cfc6b4;
+  margin-top:8px;text-align:center;max-width:70ch;padding:0 12px;line-height:1.45}
 .flechas button{width:44px;height:44px;border:1px solid rgba(203,164,42,.32);color:var(--ocre);
   display:grid;place-items:center;transition:all .4s ease}
 .flechas button:hover{background:rgba(203,164,42,.14)}
@@ -273,32 +266,24 @@ header p.baja{font-family:var(--serif);font-style:italic;color:var(--tenue);
 
 <section class="proceso">
   <div class="cab">
-    <div class="esp sello">Panel de sala</div>
     <h2>El proceso de elaboración de la chicha</h2>
     <div class="esp rojo">Del grano de maíz a la bebida</div>
-    <p class="ent">Seis láminas componen la cadena operativa registrada en la Chichería Tradición Punateña, desde la elección del grano hasta el momento en que la bebida se cuela y se sirve, de manera que el visitante puede seguir el itinerario completo por el que un cereal almacenado se convierte en el líquido que sostiene el brindis ceremonial. Las láminas se presentan ya a tamaño completo y se recorren con las flechas o deslizando de lado, de manera que las anotaciones bilingües y el código de tiempo de procedencia quedan legibles sin necesidad de ampliarlas.</p>
+    <p class="ent">Seis pasos principales componen la cadena operativa registrada en la Chichería Tradición Punateña, desde la elección del grano hasta el momento en que la bebida se cuela y se sirve, de manera que el visitante puede seguir el itinerario completo por el que un cereal almacenado se convierte en el líquido que sostiene el brindis ceremonial.</p>
   </div>
   <div class="tira">
     <div class="carro" id="carro"></div>
-  </div>
-  <div class="flechas">
-    <button id="izq" aria-label="Lámina anterior">&#8592;</button>
-    <div class="esp cuenta" id="cuenta" aria-live="polite"></div>
-    <button id="der" aria-label="Lámina siguiente">&#8594;</button>
   </div>
 </section>
 
 <section class="paneles">
   <div class="caja">
     <div class="pan">
-      <div class="esp sello">Panel de sala, transcripción literal</div>
       <h3>El maíz a través de la historia andina</h3>
       <p>El maíz fue y sigue siendo un cultivo fundamental en los Andes debido a su versatilidad, producto de su adaptación a distintos pisos ecológicos y de la experimentación humana, así como por su uso en diversos alimentos y bebidas alcohólicas, como la chicha de jora. Su importancia no se limita a la alimentación; también abarca todo el proceso de siembra, secado, cosecha, almacenamiento y preparación, etapas que forman parte de <span class="res">[las fes]</span>tividades rituales. Entre ellas destacan los pagos a <span class="res">[la tierra co]</span>mo ofrenda a la Pachamama (Madre Tierra) y los <span class="res">[brindis]</span> ceremoniales dirigidos a entidades sagradas, como los <span class="res">[a]</span>pus o las wak'as.</p>
       <div class="esp sub">Brindis con los dioses</div>
       <p>Una forma de agradecer y pedir favores a las divinidades en los antiguos Andes centrales consistía en el uso de vasijas llamadas kerus, con las que los sacerdotes brindaban. Esta acción consistía en alzar la vasija y ofrecerla a las entidades más-que-humanas tutelares para agradecer y crear un vínculo de reciprocidad que incluía a toda la comunidad.</p>
     </div>
     <div class="pan">
-      <div class="esp sello">Panel de sala, transcripción literal</div>
       <h3>El proceso de elaboración de la chicha</h3>
       <div class="esp sub">Del grano de maíz a la bebida</div>
       <p>La chicha es una bebida alcohólica elaborada artesanalmente a partir del maíz. En Bolivia, su preparación tradicional comienza con la germinación controlada del grano, proceso del que resulta la jora o wiñapu; luego este maíz germinado se seca, se muele y se cuece en agua para obtener el mosto, que después se deja fermentar durante varios días hasta adquirir su sabor y graduación característicos.</p>
@@ -363,12 +348,10 @@ OBJ.forEach(function(o,i){
 });
 
 var carro=document.getElementById("carro");
-carro.tabIndex=0;
-carro.setAttribute("aria-label","Láminas del proceso de elaboración de la chicha");
 PASOS.forEach(function(src,i){
   var d=document.createElement("figure");
   d.className="naipe";
-  d.innerHTML='<img src="'+src+'" alt="'+TIT[i]+'" decoding="sync">'
+  d.innerHTML='<img src="'+src+'" alt="'+TIT[i]+'" decoding="async">'
     +'<figcaption class="esp paso">Paso 0'+(i+1)+'</figcaption>'
     +'<div class="lem">'+TIT[i]+'. Chichería Tradición Punateña, registro de la Fundación Tortilla.</div>';
   carro.appendChild(d);
@@ -444,34 +427,6 @@ document.addEventListener("keydown",function(e){
     if(e.key==="ArrowLeft")abrir((act-1+OBJ.length)%OBJ.length);
   }
 });
-var lam=0, cuenta=document.getElementById("cuenta");
-function rotula(){ cuenta.textContent=(lam+1)+" de "+PASOS.length; }
-function mide(){
-  var n=carro.querySelector(".naipe");
-  return n?n.getBoundingClientRect().width:carro.clientWidth;
-}
-function paso(dir){
-  lam=Math.max(0,Math.min(PASOS.length-1,lam+dir));
-  carro.scrollTo({left:lam*mide(),behavior:"smooth"});
-  rotula();
-}
-document.getElementById("izq").addEventListener("click",function(){paso(-1);});
-document.getElementById("der").addEventListener("click",function(){paso(1);});
-carro.addEventListener("keydown",function(e){
-  if(e.key==="ArrowRight"){e.preventDefault();paso(1);}
-  if(e.key==="ArrowLeft"){e.preventDefault();paso(-1);}
-});
-var vig=null;
-carro.addEventListener("scroll",function(){
-  clearTimeout(vig);
-  vig=setTimeout(function(){
-    var w=mide(); if(!w)return;
-    lam=Math.max(0,Math.min(PASOS.length-1,Math.round(carro.scrollLeft/w)));
-    rotula();
-  },110);
-});
-addEventListener("resize",function(){carro.scrollLeft=lam*mide();});
-rotula();
 
 var t0=null;
 function late(ts){
