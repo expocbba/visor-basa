@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta
       name="description"
-      content="Recorrido inmersivo del Museo BASA: Landscapes in Transformation."
+      content="Recorrido inmersivo del Museo BASA. Paisajes en transformación, el valle de Cochabamba más allá de los Inkas."
     />
     <meta name="theme-color" content="#171613" />
-    <title>Landscapes in Transformation · Museo BASA 3D</title>
-    <link rel="stylesheet" href="./styles.css?v=19" />
+    <title>Paisajes en transformación · Museo BASA 3D</title>
+    <link rel="stylesheet" href="./styles.css?v=21" />
     <script type="module">
       import { ModelViewerElement } from "./model-viewer.min.js";
       ModelViewerElement.dracoDecoderLocation = new URL(
         "./",
         document.baseURI,
       ).href;
-      await import("./app.js?v=19");
+      await import("./app.js?v=21");
     </script>
   </head>
   <body>
@@ -24,7 +24,7 @@
       <model-viewer
         id="museo"
         src="./modelo.glb"
-        alt="Maqueta tridimensional de la exposición Landscapes in Transformation en el Museo BASA"
+        alt="Maqueta tridimensional de la exposición Paisajes en transformación en el Museo BASA"
         camera-controls
         disable-zoom
         disable-pan
@@ -49,66 +49,74 @@
     <div class="progreso"><span id="avance"></span></div>
 
     <div class="acciones">
-      <button id="anterior" aria-label="Estación anterior">‹</button>
-      <button id="siguiente" aria-label="Estación siguiente">›</button>
       <button id="pantalla">Pantalla completa</button>
     </div>
 
-    <nav class="estaciones" aria-label="Estaciones del recorrido">
-      <button class="estacion activa" data-estacion="general">
-        <span>00</span><strong>Vista general</strong>
-      </button>
-      <button class="estacion" data-estacion="introduccion">
-        <span>01</span><strong>Introducción</strong>
-      </button>
-      <button class="estacion" data-estacion="repartimiento">
-        <span>02</span><strong>Repartimiento</strong>
-      </button>
-      <button class="estacion" data-estacion="documentos">
-        <span>03</span><strong>Documentos coloniales</strong>
-      </button>
-      <button class="estacion" data-estacion="camino">
-        <span>04</span><strong>Camino inka y suyus</strong>
-      </button>
-      <button class="estacion" data-estacion="proyeccion">
-        <span>05</span><strong>Proyección mural</strong>
-      </button>
-      <button class="estacion" data-estacion="soras">
-        <span>06</span><strong>Mapa de los Soras</strong>
-      </button>
-      <button class="estacion" data-estacion="documental">
-        <span>07</span><strong>Documental</strong>
-      </button>
-      <button class="estacion" data-estacion="aribalos">
-        <span>08</span><strong>Vitrina central</strong>
-      </button>
-      <button class="estacion" data-estacion="materialidad">
-        <span>09</span><strong>Materialidad</strong>
-      </button>
-      <button class="estacion" data-estacion="qollqas">
-        <span>10</span><strong>Qollqas de Cotapachi</strong>
-      </button>
-      <button class="estacion" data-estacion="maiz">
-        <span>11</span><strong>Maíz y chicha</strong>
-      </button>
-      <button class="estacion" data-estacion="laminas">
-        <span>12</span><strong>Los Soras e Inkarracay</strong>
-      </button>
-      <button class="estacion" data-estacion="santuarios">
-        <span>13</span><strong>Santuarios</strong>
-      </button>
-      <button class="estacion" data-estacion="creditos">
-        <span>14</span><strong>Impressum</strong>
-      </button>
-    </nav>
+    <div class="barra">
+      <div class="mando">
+        <button id="anterior" aria-label="Estación anterior">‹</button>
+        <p class="cuenta" aria-live="polite">
+          <span id="cuenta-actual">00</span><i>/</i><span class="cuenta-total">14</span>
+        </p>
+        <button id="siguiente" aria-label="Estación siguiente">›</button>
+      </div>
+
+      <nav class="estaciones" aria-label="Estaciones del recorrido">
+        <button class="estacion activa" data-estacion="general">
+          <span>00</span><strong>Vista general</strong>
+        </button>
+        <button class="estacion" data-estacion="introduccion">
+          <span>01</span><strong>Introducción</strong>
+        </button>
+        <button class="estacion" data-estacion="repartimiento">
+          <span>02</span><strong>Repartimiento</strong>
+        </button>
+        <button class="estacion" data-estacion="documentos">
+          <span>03</span><strong>Documentos coloniales</strong>
+        </button>
+        <button class="estacion" data-estacion="camino">
+          <span>04</span><strong>Camino inka y suyus</strong>
+        </button>
+        <button class="estacion" data-estacion="proyeccion">
+          <span>05</span><strong>Proyección mural</strong>
+        </button>
+        <button class="estacion" data-estacion="soras">
+          <span>06</span><strong>Mapa de los Soras</strong>
+        </button>
+        <button class="estacion" data-estacion="documental">
+          <span>07</span><strong>Documental</strong>
+        </button>
+        <button class="estacion" data-estacion="aribalos">
+          <span>08</span><strong>Vitrina central</strong>
+        </button>
+        <button class="estacion" data-estacion="materialidad">
+          <span>09</span><strong>Materialidad</strong>
+        </button>
+        <button class="estacion" data-estacion="qollqas">
+          <span>10</span><strong>Qollqas de Cotapachi</strong>
+        </button>
+        <button class="estacion" data-estacion="maiz">
+          <span>11</span><strong>Maíz y chicha</strong>
+        </button>
+        <button class="estacion" data-estacion="laminas">
+          <span>12</span><strong>Los Soras e Inkarracay</strong>
+        </button>
+        <button class="estacion" data-estacion="santuarios">
+          <span>13</span><strong>Santuarios</strong>
+        </button>
+        <button class="estacion" data-estacion="creditos">
+          <span>14</span><strong>Impressum</strong>
+        </button>
+      </nav>
+    </div>
 
     <main class="relato" id="relato" aria-label="Recorrido narrado"></main>
 
     <div class="portada" id="portada" role="dialog" aria-label="Entrada al recorrido">
       <div class="portada-marco">
         <p class="sobrelinea">Museo BASA (Colección de las Américas de Bonn)</p>
-        <h1>Landscapes<br />in Transformation</h1>
-        <p class="subtitulo">The Cochabamba Valley Beyond the Incas</p>
+        <h1>Paisajes<br />en transformación</h1>
+        <p class="subtitulo">El valle de Cochabamba más allá de los Inkas</p>
         <button class="entrar" id="entrar" type="button">Haz clic para entrar</button>
         <p class="aviso-uso">
           Haz clic sobre la maqueta y arrastra para girar la vista. Desplázate para avanzar de una
